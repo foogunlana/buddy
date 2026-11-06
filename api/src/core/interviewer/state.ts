@@ -34,6 +34,16 @@ export interface Limits {
 
 export const DEFAULT_LIMITS: Limits = { maxGiverTurns: 30, maxDurationMs: 10 * 60 * 1000 };
 
+// Time limit counts active time: gaps between messages, each capped, so a giver who
+// steps away and comes back isn't cut off.
+export const IDLE_GAP_CAP_MS = 3 * 60 * 1000;
+
+export function activeMs(timestamps: number[], cap = IDLE_GAP_CAP_MS): number {
+  let total = 0;
+  for (let i = 1; i < timestamps.length; i++) total += Math.min(Math.max(timestamps[i]! - timestamps[i - 1]!, 0), cap);
+  return total;
+}
+
 export type StopReason = "complete" | "misconduct" | "turn_limit" | "time_limit";
 
 export function stopReason(

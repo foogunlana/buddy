@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { TurnModel } from "../core/interviewer/model.js";
+import type { StructuredLLM } from "../core/llm.js";
 import type { TurnOutput } from "../core/interviewer/state.js";
 import { testDb, type DB } from "../db/client.js";
 import { seedDemo } from "../db/seed.js";
-import { createApp, type ChatView } from "./app.js";
+import { feedbackItem } from "../db/schema.js";
+import { createApp, type ChatView, type PreviewItem, type PreviewView } from "./app.js";
 
 function turn(overrides: Partial<TurnOutput> = {}): TurnOutput {
   return { reply: "When did that last happen?", comments: [], agenda: [], identifying_detail: false, misconduct: false, done: false, ...overrides };
@@ -26,9 +28,29 @@ beforeEach(async () => {
   assignmentId = await seedDemo(db);
   outputs = [];
   seenMessages = [];
+  llmCalls = 0;
+  llmFails = false;
 });
 
-const app = () => createApp({ db, model });
+// Fake extraction + anonymisation: two items; the anonymiser prefixes text with "anon:".
+let llmCalls = 0;
+let llmFails = false;
+const llm = (async (req: { name: string; input: string }) => {
+  llmCalls += 1;
+  if (llmFails) throw new Error("llm down");
+  if (req.name === "extracted_items") {
+    return {
+      items: [
+        { polarity: "keep", agendaItemId: null, theme: "1:1s", behaviour: "Follows up", example: "Last week", impact: "Trust", ask: "Keep it up", recurrence: "pattern" },
+        { polarity: "change", agendaItemId: "q_deadlines", theme: "Deadlines", behaviour: "Says soon", example: null, impact: null, ask: "Give a range", recurrence: "pattern" },
+      ],
+    };
+  }
+  const items = JSON.parse(req.input) as { id: string; theme: string; behaviour: string | null; example: string | null; impact: string | null; ask: string | null }[];
+  return { items: items.map((i) => ({ ...i, theme: `anon:${i.theme}`, behaviour: i.behaviour && `anon:${i.behaviour}` })) };
+}) as unknown as StructuredLLM;
+
+const app = () => createApp({ db, model, llm });
 const get = (id = assignmentId) => app().request(`/api/chat/${id}`);
 const send = (text: string, a = app()) =>
   a.request(`/api/chat/${assignmentId}/messages`, {
@@ -104,5 +126,86 @@ describe("chat API", () => {
     const body = await (await send("hi")).text();
     expect(body).not.toContain("secret");
     expect(body).not.toContain("comments");
+  });
+});
+
+describe("share preview", () => {
+  const preview = async () => (await (await app().request(`/api/chat/${assignmentId}/preview`)).json()) as PreviewView;
+  const submit = (items: unknown[]) =>
+    app().request(`/api/chat/${assignmentId}/preview`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+  async function endChat(overrides: Partial<TurnOutput> = {}) {
+    await get();
+    outputs.push(turn({ done: true, reply: "Thanks.", ...overrides }));
+    await send("That's all");
+  }
+  const keep = (i: PreviewItem, edits: Partial<PreviewItem> = {}) => ({ ...i, ...edits, action: "keep" });
+
+  it("is not available while the chat is running", async () => {
+    await get();
+    expect((await preview()).state).toBe("not_ended");
+    expect(llmCalls).toBe(0);
+  });
+
+  it("generates anonymised items once, then serves them from the database", async () => {
+    await endChat();
+    const first = await preview();
+    expect(first.state).toBe("ready");
+    expect(first.floor).toBe(3);
+    expect(first.items.map((i) => i.theme)).toEqual(["anon:1:1s", "anon:Deadlines"]);
+    expect(first.items[0]!.behaviour).toBe("anon:Follows up");
+    const callsAfterFirst = llmCalls;
+    await preview();
+    expect(llmCalls).toBe(callsAfterFirst);
+  });
+
+  it("has nothing to preview after a misconduct stop", async () => {
+    await endChat({ misconduct: true });
+    expect((await preview()).state).toBe("none");
+    expect(llmCalls).toBe(0);
+  });
+
+  it("lets the giver retry if generation fails", async () => {
+    await endChat();
+    llmFails = true;
+    expect((await app().request(`/api/chat/${assignmentId}/preview`)).status).toBe(502);
+    llmFails = false;
+    expect((await preview()).state).toBe("ready");
+  });
+
+  it("pools only what the giver keeps, with their edits, and records why items were dropped", async () => {
+    await endChat();
+    const [a, b] = (await preview()).items;
+    const res = await submit([keep(a!, { ask: "Keep following up", example: "  " }), { ...b!, action: "too_identifying" }]);
+    expect(res.status).toBe(200);
+    const done = (await res.json()) as PreviewView;
+    expect(done.state).toBe("submitted");
+    expect(done.items).toHaveLength(1);
+    expect(done.items[0]).toMatchObject({ ask: "Keep following up", example: null });
+
+    const stored = await db.select().from(feedbackItem).orderBy(feedbackItem.seq);
+    expect(stored.map((i) => [i.status, i.edited])).toEqual([
+      ["approved", true],
+      ["too_identifying", false],
+    ]);
+    expect(stored[0]!.specificity).toBe(1); // example cleared: behaviour only
+  });
+
+  it("requires a decision on every item, and accepts only one submission", async () => {
+    await endChat();
+    const [a, b] = (await preview()).items;
+    expect((await submit([keep(a!)])).status).toBe(409);
+    expect((await submit([keep(a!), keep(b!)])).status).toBe(200);
+    expect((await submit([keep(a!), keep(b!)])).status).toBe(409);
+  });
+
+  it("rejects decisions for items that aren't in this preview", async () => {
+    await endChat();
+    const [a] = (await preview()).items;
+    const stranger = { ...a!, id: "00000000-0000-4000-8000-000000000000" };
+    expect((await submit([keep(a!), keep(stranger)])).status).toBe(409);
   });
 });

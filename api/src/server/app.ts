@@ -6,14 +6,19 @@ import { z } from "zod";
 import { buildAgenda } from "../core/agenda.js";
 import { Interviewer } from "../core/interviewer/interviewer.js";
 import type { TurnModel } from "../core/interviewer/model.js";
+import type { StructuredLLM } from "../core/llm.js";
 import type { InterviewContext } from "../core/interviewer/prompt.js";
 import type { StopReason } from "../core/interviewer/state.js";
 import type { DB } from "../db/client.js";
 import * as t from "../db/schema.js";
+import { getPreview, PreviewError, Submission, submitPreview, type PreviewView } from "./preview.js";
+
+export type { PreviewItem, PreviewView } from "./preview.js";
 
 export interface Deps {
   db: DB;
   model: TurnModel;
+  llm: StructuredLLM; // extraction and anonymisation for the share preview
   now?: () => number;
 }
 
@@ -28,12 +33,12 @@ export interface ChatView {
   messages: { role: "interviewer" | "giver"; text: string }[];
 }
 
-export function createApp({ db, model, now = Date.now }: Deps) {
+export function createApp({ db, model, llm, now = Date.now }: Deps) {
   const receiver = alias(t.person, "receiver");
 
-  async function loadContext(assignmentId: string): Promise<InterviewContext | null> {
+  async function loadContext(assignmentId: string): Promise<(InterviewContext & { floor: number }) | null> {
     const [row] = await db
-      .select({ a: t.assignment, receiverName: receiver.name, hrRoute: t.programme.hrRoute })
+      .select({ a: t.assignment, receiverName: receiver.name, hrRoute: t.programme.hrRoute, floor: t.programme.floor })
       .from(t.assignment)
       .innerJoin(receiver, eq(receiver.id, t.assignment.receiverId))
       .innerJoin(t.programme, eq(t.programme.id, t.assignment.programmeId))
@@ -51,6 +56,7 @@ export function createApp({ db, model, now = Date.now }: Deps) {
       relationship: row.a.relationship,
       frequency: row.a.frequency,
       hrRoute: row.hrRoute,
+      floor: row.floor,
     };
   }
 
@@ -149,6 +155,36 @@ export function createApp({ db, model, now = Date.now }: Deps) {
         return c.json({ error: "That message was already sent." }, 409);
       }
       return c.json(view(ctx, (await loadConversation(assignmentId))!));
+    })
+    // Share preview: generated on first request after the chat ends.
+    .get("/chat/:assignmentId/preview", zValidator("param", Params), async (c) => {
+      const { assignmentId } = c.req.valid("param");
+      const ctx = await loadContext(assignmentId);
+      if (!ctx) return c.json({ error: "This feedback link isn't valid." }, 404);
+      const loaded = await loadConversation(assignmentId);
+      if (!loaded) return c.json({ state: "not_ended", floor: ctx.floor, items: [] } satisfies PreviewView);
+      try {
+        const transcript = loaded.messages.map((m) => ({ role: m.role, text: m.text, at: m.at.toISOString() }));
+        return c.json(await getPreview(db, llm, ctx, ctx.floor, loaded.conv, transcript, now));
+      } catch (err) {
+        if (err instanceof PreviewError) return c.json({ error: err.message }, err.status);
+        throw err;
+      }
+    })
+    .post("/chat/:assignmentId/preview", zValidator("param", Params), zValidator("json", Submission), async (c) => {
+      const { assignmentId } = c.req.valid("param");
+      const ctx = await loadContext(assignmentId);
+      if (!ctx) return c.json({ error: "This feedback link isn't valid." }, 404);
+      const loaded = await loadConversation(assignmentId);
+      if (!loaded) return c.json({ error: "Your summary isn't ready yet." }, 409);
+      try {
+        await submitPreview(db, loaded.conv, c.req.valid("json"), now);
+      } catch (err) {
+        if (err instanceof PreviewError) return c.json({ error: err.message }, err.status);
+        throw err;
+      }
+      const [conv] = await db.select().from(t.conversation).where(eq(t.conversation.id, loaded.conv.id));
+      return c.json(await getPreview(db, llm, ctx, ctx.floor, conv!, [], now));
     });
 
   return app;

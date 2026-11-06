@@ -1,0 +1,1 @@
+ALTER TABLE "conversation" ADD COLUMN "preview_ready_at" timestamp with time zone;

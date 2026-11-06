@@ -3,7 +3,7 @@ import { buildAgenda, DEFAULT_DIMENSIONS } from "../agenda.js";
 import { Interviewer } from "./interviewer.js";
 import type { TurnModel } from "./model.js";
 import { buildSystemPrompt, type InterviewContext } from "./prompt.js";
-import { agendaCoverage, stopReason, type TurnOutput } from "./state.js";
+import { activeMs, agendaCoverage, stopReason, type TurnOutput } from "./state.js";
 
 const ctx: InterviewContext = {
   agenda: buildAgenda("Alex", [
@@ -69,6 +69,13 @@ describe("stopReason", () => {
   });
 });
 
+describe("activeMs", () => {
+  it("sums gaps, capping each one", () => {
+    expect(activeMs([0, 60_000, 60_000 + 10 * 60_000, 60_000 + 10 * 60_000 + 30_000], 180_000)).toBe(60_000 + 180_000 + 30_000);
+    expect(activeMs([5])).toBe(0);
+  });
+});
+
 describe("agendaCoverage", () => {
   it("treats missing ids as open and ignores unknown ids", () => {
     const coverage = agendaCoverage(
@@ -124,12 +131,22 @@ describe("Interviewer", () => {
     expect(last.reply).toMatch(/summary of what will be shared/);
   });
 
-  it("closes with the time limit using the injected clock", async () => {
+  it("closes with the time limit on active time", async () => {
+    let t = 0;
+    const iv = new Interviewer(ctx, scripted([turn(), turn()]), { maxGiverTurns: 99, maxDurationMs: 200_000 }, () => t);
+    iv.start();
+    t = 120_000;
+    expect((await iv.reply("a")).stop).toBeNull();
+    t = 240_000;
+    expect((await iv.reply("b")).stop).toBe("time_limit");
+  });
+
+  it("doesn't count a long pause against the time limit", async () => {
     let t = 0;
     const iv = new Interviewer(ctx, scripted([turn()]), { maxGiverTurns: 99, maxDurationMs: 600_000 }, () => t);
     iv.start();
-    t = 600_000;
-    expect((await iv.reply("a")).stop).toBe("time_limit");
+    t = 5 * 60 * 60 * 1000; // came back five hours later
+    expect((await iv.reply("a")).stop).toBeNull();
   });
 
   it("uses the model's own closing line when it says done", async () => {

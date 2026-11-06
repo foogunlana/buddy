@@ -85,7 +85,7 @@ Wrap the core in the smallest app that can run one real cycle.
 - [ ] `ui/`: Vite + React app for the three roles (giver chat done)
 - [ ] Magic-link login (links print to the terminal for now); three roles
 - [ ] Admin: one programme, CSV import of people and pairs, agenda (defaults + per-receiver questions), threshold, release date, coverage view (counts only)
-- [ ] Giver: chat UI on the M1 interviewer (chat done, not streamed), share preview with edit / remove / "too identifying", optional rating confirm
+- [x] Giver: chat UI on the M1 interviewer (not streamed), share preview with edit / remove / "too identifying" (ratings deferred until after the pilot)
 - [ ] Receiver: add one objective, read report after release, pick 1–3 actions
 - [ ] Release job: on release date, run M2 synthesis per receiver and store the report
 

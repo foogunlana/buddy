@@ -1,6 +1,7 @@
 import type { ChatMessage, TurnModel } from "./model.js";
 import { buildSystemPrompt, openingMessage, type InterviewContext } from "./prompt.js";
 import {
+  activeMs,
   DEFAULT_LIMITS,
   LIMIT_MESSAGE,
   misconductMessage,
@@ -80,7 +81,8 @@ export class Interviewer {
 
     const state = await this.model(this.system, this.messages());
     this.lastState = state;
-    const stop = stopReason(state, this.giverTurns, this.now() - this.startedAt, this.limits);
+    const elapsed = activeMs([...this.transcript.map((t) => Date.parse(t.at)), this.now()]);
+    const stop = stopReason(state, this.giverTurns, elapsed, this.limits);
 
     let reply = state.reply;
     if (stop === "misconduct") reply = misconductMessage(this.ctx.hrRoute);

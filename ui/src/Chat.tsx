@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { openChat, sendMessage, type ChatView } from "./api";
+import { Preview } from "./Preview";
 
-const ENDED_COPY: Record<string, string> = {
-  complete: "That's everything. Next you'll review exactly what will be shared before it's pooled.",
-  turn_limit: "We've reached the end of the time. Next you'll review exactly what will be shared before it's pooled.",
-  time_limit: "We've reached the end of the time. Next you'll review exactly what will be shared before it's pooled.",
-  misconduct: "This conversation has stopped. Nothing from it will go into the report.",
-};
+const MISCONDUCT_COPY = "This conversation has stopped. Nothing from it will go into the report.";
 
 export function Chat({ assignmentId }: { assignmentId: string }) {
   const [chat, setChat] = useState<ChatView | null>(null);
@@ -90,7 +86,11 @@ export function Chat({ assignmentId }: { assignmentId: string }) {
       <div ref={endRef} />
 
       {ended ? (
-        <p className="notice">{ENDED_COPY[chat.stopReason ?? "complete"] ?? ENDED_COPY.complete}</p>
+        chat.stopReason === "misconduct" ? (
+          <p className="notice">{MISCONDUCT_COPY}</p>
+        ) : (
+          <Preview assignmentId={assignmentId} receiverName={chat.receiverName} />
+        )
       ) : (
         <form className="composer" onSubmit={submit}>
           {error && <p className="notice error">{error}</p>}
