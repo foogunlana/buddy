@@ -6,7 +6,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "chat": "tsx src/cli/chat.ts",
-    "eval": "tsx evals/run.ts"
+    "eval": "tsx evals/run.ts",
+    "report": "tsx evals/report.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",

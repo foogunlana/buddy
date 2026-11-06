@@ -67,8 +67,9 @@ export type Confidence = z.infer<typeof Confidence>;
 export const Theme = z.object({
   title: z.string(),
   givers: z.number(), // how many givers raised it
-  directReports: z.number(),
-  nonDirect: z.number(),
+  // Split by relationship; null when either group is below the anonymity floor.
+  directReports: z.number().nullable(),
+  nonDirect: z.number().nullable(),
   examples: z.array(z.string()), // paraphrased, 1–2
   whyItMattered: z.string(),
   asks: z.array(z.string()), // concrete asks (empty for most "keep" themes)

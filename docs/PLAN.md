@@ -9,6 +9,7 @@ Each milestone has an exit check. Don't start the next one until it passes.
 - **Who it's for:** internal Stears users. Single org, no multi-tenancy. The code is public; real Stears data never enters the repo.
 - **When:** start M1 now. Pilot timing is set after M1 passes.
 - **Anonymity:** the product is fully anonymous. No admin or receiver screen ever shows a transcript or who said what. For now, transcripts are stored in plain text in the database, so anyone with database access can read them. Encryption and deletion come later. The privacy page must say this plainly.
+- **M1 baseline skipped (Nov 6):** there's no real form data to build a fair baseline. Treat the interviewer as good enough, build the whole pipeline, and optimise the interviewer once everything runs end to end. Known interviewer issues are in [EVAL-LOG.md](EVAL-LOG.md).
 - **Repo layout:** two top-level folders, `api/` and `ui/` (below).
 
 ## Repo layout
@@ -63,12 +64,12 @@ If the 2× bar fails, iterate on the prompt and probe ladder here. Don't build t
 
 Still offline, still in `api/src/core`.
 
-- [ ] Extractor: transcript → items with theme, polarity, dimension, behaviour, example, impact, ask, specificity score
-- [ ] Paraphraser: rewrite each item to strip writing style and identifying details (names, unique projects, dates)
-- [ ] Threshold logic: group by relationship; suppress or merge groups under the floor; quote rules (≥2 givers or opt-in)
-- [ ] Synthesiser: pooled items → report JSON in the spec's order (questions answered, summary, keep doing, change, by dimension, since last time, gaps)
-- [ ] Unit tests for threshold and merge logic (pure functions, no model calls)
-- [ ] Re-identification eval: a judge model is given the report plus the persona list and tries to attribute each theme to a giver
+- [x] Extractor: transcript → items with theme, polarity, dimension, behaviour, example, impact, ask, specificity score
+- [x] Paraphraser: rewrite each item to strip writing style and identifying details (names, unique projects, dates)
+- [x] Threshold logic: group by relationship; suppress or merge groups under the floor; quote rules (≥2 givers or opt-in)
+- [x] Synthesiser: pooled items → report JSON in the spec's order (questions answered, summary, keep doing, change, by dimension, since last time, gaps)
+- [x] Unit tests for threshold and merge logic (pure functions, no model calls)
+- [ ] (not built yet) Re-identification eval: a judge model is given the report plus the persona list and tries to attribute each theme to a giver
 
 Exit:
 

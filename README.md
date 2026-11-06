@@ -68,6 +68,15 @@ npm run eval -- --personas vague,terse --quiet
 
 Each persona (vague, terse, ranting, over-identifying, misconduct) has a hidden "true experience" of the receiver. A simulated giver plays the persona in a real conversation with the interviewer, then a grader scores the transcript: usable items (behaviour + example + ask, faithful, task-focused), how much of the hidden truth surfaced, leading or multi-part questions, and whether misconduct and identifying details were handled. Each run is saved to `api/evals/runs/`.
 
+## Build a report from an eval run
+
+```
+npm run report -- evals/runs/<run>.json            # needs 3+ givers, else the report is held
+npm run report -- evals/runs/<run>.json --floor 1  # force a report from fewer givers, for testing
+```
+
+Each persona's conversation counts as one giver. The pipeline extracts feedback items, auto-approves them (standing in for the giver's share preview), paraphrases them to remove identifying details, applies the release rules, and synthesises the report. All counts are computed in code from the items each theme cites.
+
 ## Licence
 
 MIT. See [LICENSE](LICENSE).
