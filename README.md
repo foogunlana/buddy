@@ -2,7 +2,7 @@
 
 An AI interviewer for 360 feedback. Instead of a form filled in once a cycle, each giver has a short conversation that keeps asking until every comment is specific, evidenced and actionable. The receiver gets a pooled, anonymised report built around the questions that were set in advance.
 
-> Status: pre-alpha. Nothing runs yet. See [docs/PLAN.md](docs/PLAN.md) for the build plan and [docs/SPEC.md](docs/SPEC.md) for the product spec.
+> Status: pre-alpha. The interviewer runs in the terminal; nothing else yet. See [docs/PLAN.md](docs/PLAN.md) for the build plan and [docs/SPEC.md](docs/SPEC.md) for the product spec.
 
 ## Why
 
@@ -47,6 +47,17 @@ api/
 ui/             admin, giver chat, receiver report
 docs/           spec, plan
 ```
+
+## Try the interviewer
+
+```
+cd api
+npm install
+export ANTHROPIC_API_KEY=...
+npm run chat -- --name Alex --relationship direct_report --frequency daily --debug
+```
+
+`--debug` prints the interviewer's tracked state after each turn. Type `/quit` to stop. Transcripts are saved to `api/transcripts/` (gitignored).
 
 ## Licence
 

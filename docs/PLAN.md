@@ -30,9 +30,9 @@ docs/
 
 - [x] Public repo, MIT licence, README, spec, plan
 - [x] Decide who it's for, timing, anonymity line
-- [ ] Scaffold `api/` (TypeScript, test runner, lint); `ui/` stays empty until M3
-- [ ] Freeze shared types in `api/src/core/types.ts`: `Agenda`, `FeedbackItem`, `Report`
-- [ ] CI runs `api` tests
+- [x] Scaffold `api/` (TypeScript, Vitest, `tsc` typecheck); `ui/` stays empty until M3
+- [x] Freeze shared types in `api/src/core/types.ts`: `Agenda`, `FeedbackItem`, `Report`
+- [x] CI runs `api` typecheck and tests
 
 Exit: tests run green in CI on an empty core.
 
@@ -40,8 +40,8 @@ Exit: tests run green in CI on an empty core.
 
 The core hypothesis, tested offline. No web app, no database.
 
-- [ ] `api/src/core/interviewer`: system prompt built from an agenda; turn loop that tracks which items are open and which probe rung each comment is on; stop rules (coverage, giver passes, 10 min / turn cap); identifying-detail and misconduct handling
-- [ ] CLI to chat with the interviewer in the terminal against a sample agenda
+- [x] `api/src/core/interviewer`: system prompt built from an agenda; turn loop that tracks which items are open and which probe rung each comment is on; stop rules (coverage, giver passes, 10 min / turn cap); identifying-detail and misconduct handling (unit-tested with a fake model; not yet run against the live API)
+- [x] CLI to chat with the interviewer in the terminal against a sample agenda
 - [ ] `api/evals/personas`: ~20 simulated givers, each with a hidden "true experience" of the receiver (3–5 real incidents) and a style: vague, terse, ranting, off-topic, over-identifying, no-context, disclosing misconduct
 - [ ] Form baseline: the same personas fill in a form-style prompt (two open boxes, no follow-up)
 - [ ] Extractor (shared with M2) turns each transcript or form answer into `feedback_item`s
