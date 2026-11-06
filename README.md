@@ -1,4 +1,4 @@
-# probe360
+# buddy
 
 An AI interviewer for 360 feedback. Instead of a form filled in once a cycle, each giver has a short conversation that keeps asking until every comment is specific, evidenced and actionable. The receiver gets a pooled, anonymised report built around the questions that were set in advance.
 
