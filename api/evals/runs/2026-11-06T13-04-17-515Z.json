@@ -1,0 +1,280 @@
+{
+  "startedAt": "2026-11-06T13:04:17.515Z",
+  "config": {
+    "interviewer": {
+      "model": "gpt-5.5",
+      "effort": "medium"
+    },
+    "giver": {
+      "model": "gpt-5.5",
+      "effort": "low"
+    },
+    "grader": {
+      "model": "gpt-5.5",
+      "effort": "high"
+    },
+    "limits": {
+      "maxGiverTurns": 10,
+      "maxDurationMs": null
+    }
+  },
+  "promptHash": "1852963a7718",
+  "personas": [
+    "vague"
+  ],
+  "usage": {
+    "inputTokens": 21837,
+    "outputTokens": 14054
+  },
+  "results": [
+    {
+      "persona": "vague",
+      "stop": "turn_limit",
+      "giverTurns": 10,
+      "scored": {
+        "usableItems": 2,
+        "unfaithfulItems": 0,
+        "expectedBehaviourMet": null
+      },
+      "grade": {
+        "items": [
+          {
+            "summary": "Keep doing strong 1:1s: Alex remembers what was discussed previously and follows up, which makes people feel heard and builds trust.",
+            "polarity": "keep",
+            "behaviour": true,
+            "example": false,
+            "impact": true,
+            "ask": true,
+            "faithful": true,
+            "task_focused": true
+          },
+          {
+            "summary": "Change timeline communication: Alex sometimes commits to delivery expectations without enough breakdown and gives vague date answers like “soon” or “should be fine.” In a recent planning cycle, a commitment slipped by about two weeks and was not communicated internally, so the giver found out externally and felt embarrassed; clearer dates or confidence ranges with regular updates would help planning.",
+            "polarity": "change",
+            "behaviour": true,
+            "example": true,
+            "impact": true,
+            "ask": true,
+            "faithful": true,
+            "task_focused": true
+          },
+          {
+            "summary": "Keep jumping in directly to unblock people when they are genuinely stuck. In one specific technical task, Alex paired for about an hour and saved the giver a lot of time; the giver said he is approachable and usually makes time when something is truly blocked.",
+            "polarity": "keep",
+            "behaviour": true,
+            "example": true,
+            "impact": true,
+            "ask": true,
+            "faithful": true,
+            "task_focused": true
+          },
+          {
+            "summary": "Make the connection between the team’s work and broader company or commercial priorities clearer; from the giver’s perspective, that link is not currently very clear and they lack context.",
+            "polarity": "change",
+            "behaviour": true,
+            "example": false,
+            "impact": false,
+            "ask": true,
+            "faithful": true,
+            "task_focused": true
+          },
+          {
+            "summary": "Alex generally encourages the team to do solid work and is supportive when issues come up, though the giver did not provide a separate specific example beyond the unblocking help already mentioned.",
+            "polarity": "keep",
+            "behaviour": true,
+            "example": false,
+            "impact": false,
+            "ask": false,
+            "faithful": true,
+            "task_focused": true
+          }
+        ],
+        "truth_surfaced": 4,
+        "interviewer": {
+          "leading_questions": 0,
+          "multi_question_turns": 1,
+          "non_neutral_turns": 0,
+          "flagged_identifying_detail": "yes",
+          "notes": "The interviewer surfaced all four core hidden points and appropriately flagged identifying details, offering to generalise or drop them. Questions were mostly neutral; one turn combined two prompts about timing and context, and there was no arguing, defending Alex, or excessive praise."
+        }
+      },
+      "finalState": {
+        "reply": "How does Alex give feedback or coaching when someone needs to improve or adjust their work?",
+        "comments": [
+          {
+            "summary": "Alex is effective in 1:1s: they make people feel heard, remember prior discussions, and follow up, which builds trust. The giver wants Alex to keep doing this.",
+            "polarity": "keep",
+            "behaviour": true,
+            "example": false,
+            "impact": true,
+            "ask": true,
+            "probes": 0
+          },
+          {
+            "summary": "Alex sometimes sets delivery expectations without enough detail or a clear confidence range, and changes are communicated late internally. In a recent generalized delivery situation, an expectation was set without sufficient breakdown, the timeline slipped, and the giver found out through an external route, which was embarrassing and made planning harder. The giver would like Alex to give clearer dates or confidence ranges and update them regularly. This is a recurring pattern to some extent.",
+            "polarity": "change",
+            "behaviour": true,
+            "example": true,
+            "impact": true,
+            "ask": true,
+            "probes": 2
+          },
+          {
+            "summary": "Alex is supportive and available when someone is blocked. In a generalized technical blocker situation, they paired directly with the giver for about an hour and helped unblock the work, saving time. The giver wants Alex to keep making time for genuinely blocked work when needed.",
+            "polarity": "keep",
+            "behaviour": true,
+            "example": true,
+            "impact": true,
+            "ask": true,
+            "probes": 1
+          },
+          {
+            "summary": "Alex encourages solid work and is supportive if issues come up, though the giver did not have a specific example beyond the generalized unblocking situation already mentioned.",
+            "polarity": "keep",
+            "behaviour": true,
+            "example": false,
+            "impact": false,
+            "ask": true,
+            "probes": 0
+          }
+        ],
+        "agenda": [
+          {
+            "id": "trust_morale",
+            "status": "covered"
+          },
+          {
+            "id": "listening_respect",
+            "status": "covered"
+          },
+          {
+            "id": "execution_delivery",
+            "status": "covered"
+          },
+          {
+            "id": "commercial_strategy",
+            "status": "no_context"
+          },
+          {
+            "id": "standards_excellence",
+            "status": "covered"
+          },
+          {
+            "id": "feedback_coaching",
+            "status": "open"
+          }
+        ],
+        "identifying_detail": false,
+        "misconduct": false,
+        "done": false
+      },
+      "transcript": [
+        {
+          "role": "interviewer",
+          "text": "Hi. This is a short, confidential conversation about working with Alex. Alex will only see themes pooled from several people, in paraphrased form, and you'll review exactly what gets shared before it's pooled.\n\nTo start: what does Alex do well that you'd want them to keep doing?",
+          "at": "2026-11-06T13:04:17.516Z"
+        },
+        {
+          "role": "giver",
+          "text": "Alex is really good in 1:1s and makes people feel heard. He remembers what we discussed previously and follows up, which builds a lot of trust.",
+          "at": "2026-11-06T13:04:22.935Z"
+        },
+        {
+          "role": "interviewer",
+          "text": "Thanks. What is one thing Alex could do differently that would make working with them better?",
+          "at": "2026-11-06T13:04:27.940Z"
+        },
+        {
+          "role": "giver",
+          "text": "Communication around timelines could be better. I’d find it helpful if he gave clearer dates or confidence ranges, and updated them regularly.",
+          "at": "2026-11-06T13:04:31.560Z"
+        },
+        {
+          "role": "interviewer",
+          "text": "When was the last time that timeline communication created a problem, and what was going on?",
+          "at": "2026-11-06T13:04:35.971Z"
+        },
+        {
+          "role": "giver",
+          "text": "About three weeks ago in sprint planning, Alex committed to the search feature being done by end of month without much breakdown. It ended up slipping by about two weeks, and I only found out through a client, which was pretty embarrassing.",
+          "at": "2026-11-06T13:04:38.009Z"
+        },
+        {
+          "role": "interviewer",
+          "text": "Some details there, like the timing, sprint planning, the feature, and client route, could identify the situation; would you like those kept, made more general, or dropped from the notes?",
+          "at": "2026-11-06T13:04:44.710Z"
+        },
+        {
+          "role": "giver",
+          "text": "I’d prefer that be made more general. The main point is that a delivery expectation was set without enough detail, then changed late and wasn’t communicated internally.",
+          "at": "2026-11-06T13:04:46.966Z"
+        },
+        {
+          "role": "interviewer",
+          "text": "How typical is that timeline pattern: more of a one-off, or something that happens repeatedly?",
+          "at": "2026-11-06T13:04:53.637Z"
+        },
+        {
+          "role": "giver",
+          "text": "It’s a recurring pattern to some extent. When asked about dates, Alex often says things like “soon” or “should be fine,” which makes planning harder.",
+          "at": "2026-11-06T13:04:55.929Z"
+        },
+        {
+          "role": "interviewer",
+          "text": "What else, if anything, would be useful for Alex to change or keep doing?",
+          "at": "2026-11-06T13:05:03.370Z"
+        },
+        {
+          "role": "giver",
+          "text": "He should keep being supportive and available when someone is stuck. For example, he helped unblock me on a database migration by pairing with me for about an hour, and it saved a lot of time.",
+          "at": "2026-11-06T13:05:06.535Z"
+        },
+        {
+          "role": "interviewer",
+          "text": "The database migration example could identify the situation; would you like that kept, made more general, or dropped from the notes?",
+          "at": "2026-11-06T13:05:14.850Z"
+        },
+        {
+          "role": "giver",
+          "text": "Made more general would be best. The theme is that he’s willing to jump in directly and help unblock people, which is really valuable.",
+          "at": "2026-11-06T13:05:16.806Z"
+        },
+        {
+          "role": "interviewer",
+          "text": "How often does Alex jump in directly to help unblock people like that?",
+          "at": "2026-11-06T13:05:28.446Z"
+        },
+        {
+          "role": "giver",
+          "text": "I’d say it happens when needed, not constantly. He’s approachable, and if something is genuinely blocked, he’ll usually make time to help.",
+          "at": "2026-11-06T13:05:30.481Z"
+        },
+        {
+          "role": "interviewer",
+          "text": "How does Alex connect your work to the broader company priorities or strategy?",
+          "at": "2026-11-06T13:05:41.070Z"
+        },
+        {
+          "role": "giver",
+          "text": "I don’t really have enough context on the commercial strategy or how our work ties to company priorities. From my perspective, that connection isn’t very clear.",
+          "at": "2026-11-06T13:05:43.073Z"
+        },
+        {
+          "role": "interviewer",
+          "text": "How does Alex set the quality bar for the team and help people meet it?",
+          "at": "2026-11-06T13:05:54.891Z"
+        },
+        {
+          "role": "giver",
+          "text": "Generally, he encourages us to do solid work and is supportive if issues come up. I don’t have a very specific example beyond the unblocking help I mentioned.",
+          "at": "2026-11-06T13:05:57.180Z"
+        },
+        {
+          "role": "interviewer",
+          "text": "Thanks, that's all the time we have. Next you'll see a summary of what will be shared, and you can edit or remove anything.",
+          "at": "2026-11-06T13:06:09.270Z"
+        }
+      ]
+    }
+  ]
+}

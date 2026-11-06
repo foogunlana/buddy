@@ -55,6 +55,8 @@ Exit:
 - Misconduct persona always routed to the HR path; never extracted as an item
 - Median simulated conversation within 8 turns per comment budget
 
+Findings from eval runs are logged in [EVAL-LOG.md](EVAL-LOG.md).
+
 If the 2× bar fails, iterate on the prompt and probe ladder here. Don't build the app on a weak interviewer.
 
 ## M2 — Extraction, anonymisation, synthesis
