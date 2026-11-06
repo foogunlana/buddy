@@ -98,9 +98,15 @@ async function runPersona(p: Persona) {
   };
   const model = await openaiTurnModel({ ...config.interviewer, onUsage: addUsage });
   const iv = new Interviewer(ctx, model, config.limits);
-  iv.start();
+  const log = (who: string, text: string) => {
+    if (!values.quiet) console.log(`\n[${p.id}] ${who}: ${text}`);
+  };
+  log("INTERVIEWER", iv.start());
   while (!iv.stopReason) {
-    await iv.reply(await giverTurn(p, iv));
+    const said = await giverTurn(p, iv);
+    log("GIVER", said);
+    const { reply, stop } = await iv.reply(said);
+    log("INTERVIEWER", reply + (stop ? `\n[${p.id}] -- ended: ${stop}, grading...` : ""));
   }
   const g = await grade(p, iv);
   return {
@@ -119,10 +125,6 @@ const results = await Promise.all(selected.map(runPersona));
 
 // --- Print ---
 for (const r of results) {
-  if (!values.quiet) {
-    console.log(`\n${"=".repeat(70)}\n${r.persona.toUpperCase()}  (ended: ${r.stop}, ${r.giverTurns} giver turns)\n${"=".repeat(70)}`);
-    console.log(renderTranscript(r.transcript));
-  }
   console.log(`\n-- ${r.persona} grader notes: ${r.grade.interviewer.notes}`);
 }
 
