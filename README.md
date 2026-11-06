@@ -27,21 +27,25 @@ The first milestone tests this with simulated givers before any web app exists.
 2. **Giver** chats with the interviewer for 5–8 minutes, then reviews a paraphrased, de-identified preview of exactly what will be shared.
 3. **Receiver** reads a report once each group has at least 3 givers: their questions answered first, then themes with evidence counts and concrete asks. They commit to 1–3 actions, which become next round's agenda.
 
-No human reads a raw transcript.
+No admin or receiver screen ever shows a transcript or who said what. In this early version transcripts are stored in plain text in the database, so people with database access can read them; encryption comes later.
 
 ## Stack (planned)
 
-- TypeScript, Next.js, Postgres
+- `api/`: TypeScript, Postgres
+- `ui/`: React
 - Claude API: Sonnet 5.5 for the live interview, Opus 5.5 for extraction and synthesis
-- Core logic (interviewer, extractor, anonymiser, synthesiser) lives in a framework-free package so it can be evaluated without the web app
+- Core logic (interviewer, extractor, anonymiser, synthesiser) lives in `api/src/core` with no web or database imports, so it can be evaluated on its own
 
 ## Repo layout (planned)
 
 ```
-packages/core/     interviewer, extraction, anonymisation, synthesis (pure TS)
-apps/web/          Next.js app: admin, giver chat, receiver report
-evals/             simulated giver personas, judge rubrics, run outputs
-docs/              spec, plan, decisions
+api/
+  src/core/     interviewer, extraction, anonymisation, synthesis
+  src/db/       schema, migrations, queries
+  src/routes/   HTTP endpoints
+  evals/        simulated giver personas, judge rubrics, run outputs
+ui/             admin, giver chat, receiver report
+docs/           spec, plan
 ```
 
 ## Licence

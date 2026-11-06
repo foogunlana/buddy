@@ -68,11 +68,11 @@ Goal: turn each comment into a usable feedback item (one behaviour, one real exa
 
 ## Anonymity and trust model
 
-No person reads a raw transcript. The receiver only sees pooled, paraphrased output.
+No admin or receiver screen shows a raw transcript. The receiver only sees pooled, paraphrased output.
 
 | Layer | Rule |
 |---|---|
-| Transcripts | Encrypted, readable only by the pipeline. Deleted after synthesis plus a retention window (default 90 days). |
+| Transcripts | Never shown in the product. MVP: stored in plain text in the database (readable by anyone with DB access). Later: encrypted, deleted after a retention window. |
 | Feedback items | Extracted per conversation, paraphrased to strip writing style, giver-approved before pooling. |
 | Thresholds | A group (direct, non-direct) appears only with ≥3 givers; otherwise merged into "all colleagues" or held. |
 | Timing | Year-round entries released in batches on a fixed date, never one by one. |

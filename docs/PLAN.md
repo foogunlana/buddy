@@ -4,25 +4,49 @@ The riskiest assumption is that the interviewer actually gets more specific, act
 
 Each milestone has an exit check. Don't start the next one until it passes.
 
-## M0 — Repo and decisions
+## Decisions (Nov 6, 2026)
+
+- **Who it's for:** internal Stears users. Single org, no multi-tenancy. The code is public; real Stears data never enters the repo.
+- **When:** start M1 now. Pilot timing is set after M1 passes.
+- **Anonymity:** the product is fully anonymous. No admin or receiver screen ever shows a transcript or who said what. For now, transcripts are stored in plain text in the database, so anyone with database access can read them. Encryption and deletion come later. The privacy page must say this plainly.
+- **Repo layout:** two top-level folders, `api/` and `ui/` (below).
+
+## Repo layout
+
+```
+api/
+  src/core/     interviewer, extraction, anonymisation, synthesis (no web or DB imports)
+  src/db/       schema, migrations, queries
+  src/routes/   HTTP endpoints for admin, giver, receiver
+  evals/        personas, form baseline, judge, runs/
+ui/
+  src/          admin, giver chat, receiver report
+docs/
+```
+
+`api/src/core` stays free of web and database code so the evals can run it directly.
+
+## M0 — Repo setup
 
 - [x] Public repo, MIT licence, README, spec, plan
-- [ ] Decide the three blocking questions (see [Open questions](#open-questions)): who this is for, pilot timing, the anonymity line
-- [ ] Set up the TypeScript workspace: `packages/core`, `evals/`, `apps/web` (empty), lint, test runner, CI
+- [x] Decide who it's for, timing, anonymity line
+- [ ] Scaffold `api/` (TypeScript, test runner, lint); `ui/` stays empty until M3
+- [ ] Freeze shared types in `api/src/core/types.ts`: `Agenda`, `FeedbackItem`, `Report`
+- [ ] CI runs `api` tests
 
-Exit: `pnpm test` runs green in CI on an empty core package.
+Exit: tests run green in CI on an empty core.
 
 ## M1 — Interviewer core and eval harness
 
 The core hypothesis, tested offline. No web app, no database.
 
-- [ ] `packages/core/interviewer`: system prompt built from an agenda; turn loop that tracks which items are open and which probe rung each comment is on; stop rules (coverage, giver passes, 10 min / turn cap); identifying-detail and misconduct handling
+- [ ] `api/src/core/interviewer`: system prompt built from an agenda; turn loop that tracks which items are open and which probe rung each comment is on; stop rules (coverage, giver passes, 10 min / turn cap); identifying-detail and misconduct handling
 - [ ] CLI to chat with the interviewer in the terminal against a sample agenda
-- [ ] `evals/personas`: ~20 simulated givers, each with a hidden "true experience" of the receiver (3–5 real incidents) and a style: vague, terse, ranting, off-topic, over-identifying, no-context, disclosing misconduct
+- [ ] `api/evals/personas`: ~20 simulated givers, each with a hidden "true experience" of the receiver (3–5 real incidents) and a style: vague, terse, ranting, off-topic, over-identifying, no-context, disclosing misconduct
 - [ ] Form baseline: the same personas fill in a form-style prompt (two open boxes, no follow-up)
 - [ ] Extractor (shared with M2) turns each transcript or form answer into `feedback_item`s
 - [ ] Judge rubric: for each item, is it specific (behaviour + example), actionable (concrete ask), faithful to the persona's true experience (no invented detail), and task-focused rather than self-focused
-- [ ] Run layout: one immutable JSON per run in `evals/runs/` with the full config (model IDs, prompt hash, persona set, seed) and a dated notebook per analysis
+- [ ] Run layout: one immutable JSON per run in `api/evals/runs/` with the full config (model IDs, prompt hash, persona set, seed) and a dated notebook per analysis
 
 Exit:
 
@@ -35,7 +59,7 @@ If the 2× bar fails, iterate on the prompt and probe ladder here. Don't build t
 
 ## M2 — Extraction, anonymisation, synthesis
 
-Still offline, still in `packages/core`.
+Still offline, still in `api/src/core`.
 
 - [ ] Extractor: transcript → items with theme, polarity, dimension, behaviour, example, impact, ask, specificity score
 - [ ] Paraphraser: rewrite each item to strip writing style and identifying details (names, unique projects, dates)
@@ -54,13 +78,13 @@ Exit:
 
 Wrap the core in the smallest app that can run one real cycle.
 
-- [ ] Next.js app, Postgres, migrations for the spec's data model
+- [ ] `api/`: Postgres, migrations for the spec's data model, HTTP routes
+- [ ] `ui/`: React app for the three roles
 - [ ] Magic-link email login; three roles
 - [ ] Admin: one programme, CSV import of people and pairs, agenda (defaults + per-receiver questions), threshold, release date, coverage view (counts only)
 - [ ] Giver: chat UI on the M1 interviewer (streamed), share preview with edit / remove / "too identifying", optional rating confirm
 - [ ] Receiver: add one objective, read report after release, pick 1–3 actions
 - [ ] Release job: on release date, run M2 synthesis per receiver and store the report
-- [ ] Transcript encryption at rest; retention job that deletes transcripts after the window
 
 Exit: an end-to-end run with 3 fake receivers and 12 fake givers (driven by M1 personas through the real UI or API) produces correct reports, and no admin or receiver route can return a transcript (tested).
 
@@ -91,7 +115,8 @@ In rough priority order, only if the pilot clears the bar:
 3. Trends across rounds ("since last time")
 4. Google Chat / Slack nudges
 5. Voice
-6. Multi-tenancy and SSO, if anyone outside the first org wants it
+6. Transcript encryption at rest and a retention job that deletes transcripts
+7. SSO
 
 ## Workstreams for parallel agents
 
@@ -105,17 +130,16 @@ Once M0 is done, these can run in parallel against fixed interfaces:
 | 4 | Extraction + anonymisation + synthesis | Report JSON | `feedback_item` type |
 | 5 | Receiver report UI | Report page and action picker | Report JSON schema from 4 |
 
-Freeze the shared types (`Agenda`, `FeedbackItem`, `Report`) in `packages/core/types.ts` first; that is the only coordination point.
+Freeze the shared types (`Agenda`, `FeedbackItem`, `Report`) in `api/src/core/types.ts` first; that is the only coordination point.
 
 ## Open questions
 
-The first three block M1 design choices; the rest can default.
+None block M1. Defaults hold unless changed.
 
-1. **Who is this for?** One org's internal experiment, or a self-hostable tool for any org? Defaults to the second in the repo (generic, single-tenant), tested with the first.
-2. **Pilot timing.** When does the next real cycle open, and who is the admin? M3 needs to land before it.
-3. **Anonymity line.** Is "no human ever reads a transcript" absolute, or can an admin read in narrow cases? What happens on a misconduct disclosure?
-4. **Ratings.** Keep the 0–5 grid, have the interviewer propose ratings, or drop numbers for the pilot? Default: propose and confirm.
-5. **Receiver objectives.** Do givers see "Alex wants to know about X"? Default: yes, admin approves.
-6. **Model provider and data.** Fine to send employee feedback to the Claude API? Any data residency constraint?
-7. **Text or voice.** Default: text for the MVP.
-8. **Who gets reviewed.** Managers only, or peers too? Default: managers only.
+1. **Misconduct.** Default: the interviewer stops, points to the formal HR route, and keeps it out of the report.
+2. **Pilot timing and admin.** When does the next real cycle open, and is People & Culture the admin? Set after M1 passes.
+3. **Ratings.** Keep the 0–5 grid, have the interviewer propose ratings, or drop numbers for the pilot? Default: propose and confirm.
+4. **Receiver objectives.** Do givers see "Alex wants to know about X"? Default: yes, admin approves.
+5. **Model provider and data.** Fine to send employee feedback to the Claude API? Any data residency constraint?
+6. **Text or voice.** Default: text for the MVP.
+7. **Who gets reviewed.** Managers only, or peers too? Default: managers only.
