@@ -33,7 +33,7 @@ No admin or receiver screen ever shows a transcript or who said what. In this ea
 
 - `api/`: TypeScript, Postgres
 - `ui/`: React
-- Claude API: Sonnet 5.5 for the live interview, Opus 5.5 for extraction and synthesis
+- LLM: OpenAI by default (`OPENAI_MODEL`, default `gpt-5.5`); Claude also supported with `--provider claude`
 - Core logic (interviewer, extractor, anonymiser, synthesiser) lives in `api/src/core` with no web or database imports, so it can be evaluated on its own
 
 ## Repo layout (planned)
@@ -53,11 +53,20 @@ docs/           spec, plan
 ```
 cd api
 npm install
-export ANTHROPIC_API_KEY=...
+echo 'OPENAI_API_KEY=sk-...' > .env   # gitignored
 npm run chat -- --name Alex --relationship direct_report --frequency daily --debug
 ```
 
 `--debug` prints the interviewer's tracked state after each turn. Type `/quit` to stop. Transcripts are saved to `api/transcripts/` (gitignored).
+
+## Run the simulated-giver eval
+
+```
+npm run eval                                  # all personas
+npm run eval -- --personas vague,terse --quiet
+```
+
+Each persona (vague, terse, ranting, over-identifying, misconduct) has a hidden "true experience" of the receiver. A simulated giver plays the persona in a real conversation with the interviewer, then a grader scores the transcript: usable items (behaviour + example + ask, faithful, task-focused), how much of the hidden truth surfaced, leading or multi-part questions, and whether misconduct and identifying details were handled. Each run is saved to `api/evals/runs/`.
 
 ## Licence
 

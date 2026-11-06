@@ -1,5 +1,4 @@
-import type Anthropic from "@anthropic-ai/sdk";
-import type { TurnModel } from "./model.js";
+import type { ChatMessage, TurnModel } from "./model.js";
 import { buildSystemPrompt, openingMessage, type InterviewContext } from "./prompt.js";
 import {
   DEFAULT_LIMITS,
@@ -75,9 +74,9 @@ export class Interviewer {
     return { reply, state, stop };
   }
 
-  // Transcript in Messages API shape. The first user turn is a placeholder.
-  messages(): Anthropic.MessageParam[] {
-    const out: Anthropic.MessageParam[] = [{ role: "user", content: CHAT_OPENED }];
+  // Transcript as chat messages. The first user turn is a placeholder.
+  messages(): ChatMessage[] {
+    const out: ChatMessage[] = [{ role: "user", content: CHAT_OPENED }];
     for (const turn of this.transcript) {
       out.push({ role: turn.role === "interviewer" ? "assistant" : "user", content: turn.text });
     }

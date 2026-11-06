@@ -1,21 +1,25 @@
 // Chat with the interviewer in the terminal.
 //   npm run chat -- --name Alex --relationship direct_report --frequency daily
-// Needs ANTHROPIC_API_KEY (or another Anthropic credential) in the environment.
+// Needs OPENAI_API_KEY (default) or ANTHROPIC_API_KEY with --provider claude,
+// in the environment or in api/.env (gitignored). Set OPENAI_MODEL to override the model.
 // Transcripts are saved to api/transcripts/ (gitignored).
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 import { parseArgs } from "node:util";
 import { buildAgenda } from "../core/agenda.js";
 import { Interviewer } from "../core/interviewer/interviewer.js";
-import { claudeTurnModel } from "../core/interviewer/model.js";
+import { claudeTurnModel, openaiTurnModel } from "../core/interviewer/model.js";
 import { InteractionFrequency, Relationship } from "../core/types.js";
+
+if (existsSync(".env")) process.loadEnvFile(".env");
 
 const { values } = parseArgs({
   options: {
     name: { type: "string", default: "Alex" },
     relationship: { type: "string", default: "direct_report" },
     frequency: { type: "string", default: "daily" },
-    model: { type: "string", default: "claude-sonnet-5-5" },
+    provider: { type: "string", default: "openai" },
+    model: { type: "string" },
     debug: { type: "boolean", default: false },
   },
 });
@@ -36,7 +40,9 @@ const interviewer = new Interviewer(
     frequency: InteractionFrequency.parse(values.frequency),
     hrRoute: "your People & Culture lead or the formal grievance process",
   },
-  claudeTurnModel({ model: values.model }),
+  values.provider === "claude"
+    ? await claudeTurnModel({ model: values.model })
+    : await openaiTurnModel({ model: values.model }),
 );
 
 const rl = createInterface({ input: process.stdin, output: process.stdout });

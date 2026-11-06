@@ -5,10 +5,12 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "chat": "tsx src/cli/chat.ts"
+    "chat": "tsx src/cli/chat.ts",
+    "eval": "tsx evals/run.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
+    "openai": "^7.53.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {

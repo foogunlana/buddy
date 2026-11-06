@@ -40,13 +40,13 @@ Exit: tests run green in CI on an empty core.
 
 The core hypothesis, tested offline. No web app, no database.
 
-- [x] `api/src/core/interviewer`: system prompt built from an agenda; turn loop that tracks which items are open and which probe rung each comment is on; stop rules (coverage, giver passes, 10 min / turn cap); identifying-detail and misconduct handling (unit-tested with a fake model; not yet run against the live API)
+- [x] `api/src/core/interviewer`: system prompt built from an agenda; turn loop that tracks which items are open and which probe rung each comment is on; stop rules (coverage, giver passes, 10 min / turn cap); identifying-detail and misconduct handling (unit-tested with a fake model; not yet run live)
 - [x] CLI to chat with the interviewer in the terminal against a sample agenda
-- [ ] `api/evals/personas`: ~20 simulated givers, each with a hidden "true experience" of the receiver (3–5 real incidents) and a style: vague, terse, ranting, off-topic, over-identifying, no-context, disclosing misconduct
+- [ ] `api/evals/personas`: ~20 simulated givers (5 written: vague, terse, ranting, over-identifying, misconduct), each with a hidden "true experience" of the receiver (3–5 real incidents) and a style: vague, terse, ranting, off-topic, over-identifying, no-context, disclosing misconduct
 - [ ] Form baseline: the same personas fill in a form-style prompt (two open boxes, no follow-up)
 - [ ] Extractor (shared with M2) turns each transcript or form answer into `feedback_item`s
-- [ ] Judge rubric: for each item, is it specific (behaviour + example), actionable (concrete ask), faithful to the persona's true experience (no invented detail), and task-focused rather than self-focused
-- [ ] Run layout: one immutable JSON per run in `api/evals/runs/` with the full config (model IDs, prompt hash, persona set, seed) and a dated notebook per analysis
+- [x] Judge rubric (`api/evals/grade.ts`), run against simulated conversations (`npm run eval`): for each item, is it specific (behaviour + example), actionable (concrete ask), faithful to the persona's true experience (no invented detail), and task-focused rather than self-focused
+- [x] Run layout: one immutable JSON per run in `api/evals/runs/` with the full config (model IDs, prompt hash, persona set, seed) and a dated notebook per analysis
 
 Exit:
 
