@@ -42,6 +42,23 @@ export class Interviewer {
     this.system = buildSystemPrompt(ctx);
   }
 
+  // Rebuild an in-progress interview from storage (the API is stateless between requests).
+  static resume(
+    ctx: InterviewContext,
+    model: TurnModel,
+    saved: { transcript: TranscriptTurn[]; startedAt: number; stop: StopReason | null; lastState: TurnOutput | null },
+    limits: Limits = DEFAULT_LIMITS,
+    now: () => number = Date.now,
+  ): Interviewer {
+    const iv = new Interviewer(ctx, model, limits, now);
+    iv.transcript.push(...saved.transcript);
+    iv.startedAt = saved.startedAt;
+    iv.giverTurns = saved.transcript.filter((t) => t.role === "giver").length;
+    iv.stopped = saved.stop;
+    iv.lastState = saved.lastState;
+    return iv;
+  }
+
   get stopReason(): StopReason | null {
     return this.stopped;
   }

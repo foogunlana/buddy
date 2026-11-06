@@ -81,11 +81,11 @@ Exit:
 
 Wrap the core in the smallest app that can run one real cycle.
 
-- [ ] `api/`: Postgres, migrations for the spec's data model, HTTP routes
-- [ ] `ui/`: React app for the three roles
-- [ ] Magic-link email login; three roles
+- [x] `api/`: Hono, Drizzle on Postgres (Docker), migrations, chat routes (people, programme, agenda, assignment, conversation, message)
+- [ ] `ui/`: Vite + React app for the three roles (giver chat done)
+- [ ] Magic-link login (links print to the terminal for now); three roles
 - [ ] Admin: one programme, CSV import of people and pairs, agenda (defaults + per-receiver questions), threshold, release date, coverage view (counts only)
-- [ ] Giver: chat UI on the M1 interviewer (streamed), share preview with edit / remove / "too identifying", optional rating confirm
+- [ ] Giver: chat UI on the M1 interviewer (chat done, not streamed), share preview with edit / remove / "too identifying", optional rating confirm
 - [ ] Receiver: add one objective, read report after release, pick 1–3 actions
 - [ ] Release job: on release date, run M2 synthesis per receiver and store the report
 

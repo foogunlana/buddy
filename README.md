@@ -2,7 +2,7 @@
 
 An AI interviewer for 360 feedback. Instead of a form filled in once a cycle, each giver has a short conversation that keeps asking until every comment is specific, evidenced and actionable. The receiver gets a pooled, anonymised report built around the questions that were set in advance.
 
-> Status: pre-alpha. The interviewer runs in the terminal; nothing else yet. See [docs/PLAN.md](docs/PLAN.md) for the build plan and [docs/SPEC.md](docs/SPEC.md) for the product spec.
+> Status: pre-alpha. The giver chat runs in the browser; the pipeline runs from the terminal. See [docs/PLAN.md](docs/PLAN.md) for the build plan and [docs/SPEC.md](docs/SPEC.md) for the product spec.
 
 ## Why
 
@@ -31,8 +31,8 @@ No admin or receiver screen ever shows a transcript or who said what. In this ea
 
 ## Stack (planned)
 
-- `api/`: TypeScript, Postgres
-- `ui/`: React
+- `api/`: TypeScript, Hono, Drizzle on Postgres
+- `ui/`: Vite + React, calling the API through Hono's typed client
 - LLM: OpenAI by default (`OPENAI_MODEL`, default `gpt-5.5`); Claude also supported with `--provider claude`
 - Core logic (interviewer, extractor, anonymiser, synthesiser) lives in `api/src/core` with no web or database imports, so it can be evaluated on its own
 
@@ -44,9 +44,25 @@ api/
   src/db/       schema, migrations, queries
   src/routes/   HTTP endpoints
   evals/        simulated giver personas, judge rubrics, run outputs
-ui/             admin, giver chat, receiver report
+ui/             Vite + React: giver chat (admin and receiver screens to come)
 docs/           spec, plan
 ```
+
+## Run the app locally
+
+Needs Docker and Node 24. Put `OPENAI_API_KEY=...` and `DATABASE_URL=postgres://buddy:buddy@localhost:5544/buddy` in `api/.env`, one per line.
+
+```
+docker compose up -d                 # Postgres on localhost:5544
+cd api && npm install
+npm run db:migrate
+npm run db:seed                      # prints a giver chat link
+npm run dev                          # API on :8787
+
+cd ui && npm install && npm run dev  # UI on :5173
+```
+
+Open the link `db:seed` printed. So far only the giver chat exists; see [docs/PLAN.md](docs/PLAN.md).
 
 ## Try the interviewer
 

@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: buddy
+      POSTGRES_PASSWORD: buddy
+      POSTGRES_DB: buddy
+    ports:
+      - "5544:5432"
+    volumes:
+      - buddy-db:/var/lib/postgresql/data
+volumes:
+  buddy-db:
