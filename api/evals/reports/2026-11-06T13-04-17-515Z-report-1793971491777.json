@@ -1,0 +1,245 @@
+{
+  "run": "evals/runs/2026-11-06T13-04-17-515Z.json",
+  "floor": 1,
+  "perGiver": [
+    {
+      "persona": "vague",
+      "raw": [
+        {
+          "polarity": "keep",
+          "agendaItemId": "listening_respect",
+          "theme": "1:1 follow-through",
+          "behaviour": "In 1:1s, Alex makes people feel heard, remembers previous discussions, and follows up.",
+          "example": null,
+          "impact": "Builds a lot of trust.",
+          "ask": "Keep doing this in 1:1s.",
+          "recurrence": "pattern",
+          "id": "c1-1",
+          "specificity": 1,
+          "approved": false
+        },
+        {
+          "polarity": "change",
+          "agendaItemId": "execution_delivery",
+          "theme": "Timeline communication",
+          "behaviour": "Alex sets delivery expectations without enough detail and communicates changes late or not internally.",
+          "example": "A delivery expectation was set without enough detail, then changed late and was not communicated internally.",
+          "impact": "Makes planning harder.",
+          "ask": "Give clearer dates or confidence ranges and update them regularly.",
+          "recurrence": "pattern",
+          "id": "c1-2",
+          "specificity": 3,
+          "approved": false
+        },
+        {
+          "polarity": "keep",
+          "agendaItemId": "feedback_coaching",
+          "theme": "Hands-on unblocking",
+          "behaviour": "Alex is supportive and available when someone is stuck, and is willing to jump in directly to help unblock people.",
+          "example": "He made time to work directly with someone who was blocked, which helped resolve the issue faster.",
+          "impact": "Saved a lot of time and is valuable to the team.",
+          "ask": "Keep making time to help when someone is genuinely blocked.",
+          "recurrence": "pattern",
+          "id": "c1-3",
+          "specificity": 3,
+          "approved": false
+        },
+        {
+          "polarity": "keep",
+          "agendaItemId": "standards_excellence",
+          "theme": "Supportive quality bar",
+          "behaviour": "Alex encourages the team to do solid work and is supportive if issues come up.",
+          "example": null,
+          "impact": null,
+          "ask": "Keep encouraging solid work and supporting the team when issues arise.",
+          "recurrence": "pattern",
+          "id": "c1-4",
+          "specificity": 1,
+          "approved": false
+        }
+      ],
+      "anon": [
+        {
+          "polarity": "keep",
+          "agendaItemId": "listening_respect",
+          "theme": "Follow-through in 1:1 conversations",
+          "behaviour": "In 1:1 conversations, Alex helps people feel heard, recalls earlier discussions, and follows up on agreed points.",
+          "example": null,
+          "impact": "This builds trust.",
+          "ask": "Continue following up consistently in 1:1 conversations.",
+          "recurrence": "pattern",
+          "id": "c1-1",
+          "specificity": 1,
+          "approved": true
+        },
+        {
+          "polarity": "change",
+          "agendaItemId": "execution_delivery",
+          "theme": "Communication about timelines",
+          "behaviour": "Alex sometimes sets delivery expectations without enough detail and communicates changes late or not at all to the relevant internal group.",
+          "example": "A delivery expectation was set without enough detail, then later changed and was not communicated internally in time.",
+          "impact": "This makes planning harder.",
+          "ask": "Provide clearer dates or confidence ranges, and update them regularly when timelines change.",
+          "recurrence": "pattern",
+          "id": "c1-2",
+          "specificity": 3,
+          "approved": true
+        },
+        {
+          "polarity": "keep",
+          "agendaItemId": "feedback_coaching",
+          "theme": "Helping unblock work",
+          "behaviour": "Alex is supportive and available when someone is stuck, and is willing to get involved directly to help remove blockers.",
+          "example": "Alex made time to work directly with someone who was blocked, which helped resolve the issue more quickly.",
+          "impact": "This saves time and provides value to the team.",
+          "ask": "Continue making time to help when someone is genuinely blocked.",
+          "recurrence": "pattern",
+          "id": "c1-3",
+          "specificity": 3,
+          "approved": true
+        },
+        {
+          "polarity": "keep",
+          "agendaItemId": "standards_excellence",
+          "theme": "Supportive quality expectations",
+          "behaviour": "Alex encourages the team to produce solid work and provides support when issues come up.",
+          "example": null,
+          "impact": null,
+          "ask": "Continue encouraging solid work and supporting the team when issues arise.",
+          "recurrence": "pattern",
+          "id": "c1-4",
+          "specificity": 1,
+          "approved": true
+        }
+      ],
+      "relationship": "direct_report"
+    }
+  ],
+  "result": {
+    "status": "released",
+    "report": {
+      "receiverName": "Alex",
+      "totalGivers": 1,
+      "questionsAnswered": [],
+      "summary": "Alex’s strongest keep theme is consistent support: in 1:1s, Alex helps people feel heard, follows up, and makes time to unblock work. Feedback also points to helpful quality expectations, with support provided when issues arise. The main change theme is timeline communication: delivery expectations sometimes need clearer detail, earlier updates, and shared confidence ranges so others can plan reliably.",
+      "keepDoing": [
+        {
+          "title": "Follow through in 1:1 conversations",
+          "givers": 1,
+          "directReports": null,
+          "nonDirect": null,
+          "examples": [],
+          "whyItMattered": "Consistent follow-through in 1:1 conversations builds trust and makes discussions feel actionable.",
+          "asks": [
+            "Continue following up consistently on agreed points from 1:1 conversations."
+          ]
+        },
+        {
+          "title": "Support the team to unblock work and meet standards",
+          "givers": 1,
+          "directReports": null,
+          "nonDirect": null,
+          "examples": [],
+          "whyItMattered": "Timely support helps work move faster while maintaining solid quality expectations.",
+          "asks": [
+            "Continue making time to help when someone is genuinely blocked.",
+            "Continue encouraging solid work and supporting the team when issues arise."
+          ]
+        }
+      ],
+      "change": [
+        {
+          "title": "Give clearer and earlier timeline updates",
+          "givers": 1,
+          "directReports": null,
+          "nonDirect": null,
+          "examples": [],
+          "whyItMattered": "Clear and timely timeline communication helps internal planning and coordination.",
+          "asks": [
+            "When setting delivery expectations, provide clearer dates or confidence ranges.",
+            "When timelines change, update the relevant internal group promptly and regularly."
+          ]
+        }
+      ],
+      "byDimension": [
+        {
+          "agendaItemId": "trust_morale",
+          "title": "Trust & Morale",
+          "averageRating": null,
+          "ratings": 0
+        },
+        {
+          "agendaItemId": "listening_respect",
+          "title": "Listening & Respect",
+          "averageRating": null,
+          "ratings": 0
+        },
+        {
+          "agendaItemId": "execution_delivery",
+          "title": "Execution & Delivery",
+          "averageRating": null,
+          "ratings": 0
+        },
+        {
+          "agendaItemId": "commercial_strategy",
+          "title": "Commercial & Strategy Alignment",
+          "averageRating": null,
+          "ratings": 0
+        },
+        {
+          "agendaItemId": "standards_excellence",
+          "title": "Standards & Excellence",
+          "averageRating": null,
+          "ratings": 0
+        },
+        {
+          "agendaItemId": "feedback_coaching",
+          "title": "Feedback & Coaching",
+          "averageRating": null,
+          "ratings": 0
+        }
+      ],
+      "sinceLastTime": [],
+      "gaps": [
+        {
+          "agendaItemId": "trust_morale",
+          "title": "Trust & Morale",
+          "voices": 0
+        },
+        {
+          "agendaItemId": "commercial_strategy",
+          "title": "Commercial & Strategy Alignment",
+          "voices": 0
+        }
+      ]
+    },
+    "trace": {
+      "themes": [
+        {
+          "title": "Follow through in 1:1 conversations",
+          "itemIds": [
+            "c1-1"
+          ]
+        },
+        {
+          "title": "Support the team to unblock work and meet standards",
+          "itemIds": [
+            "c1-3",
+            "c1-4"
+          ]
+        },
+        {
+          "title": "Give clearer and earlier timeline updates",
+          "itemIds": [
+            "c1-2"
+          ]
+        }
+      ],
+      "answers": []
+    }
+  },
+  "usage": {
+    "inputTokens": 2466,
+    "outputTokens": 2036
+  }
+}

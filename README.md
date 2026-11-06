@@ -77,6 +77,14 @@ npm run report -- evals/runs/<run>.json --floor 1  # force a report from fewer g
 
 Each persona's conversation counts as one giver. The pipeline extracts feedback items, auto-approves them (standing in for the giver's share preview), paraphrases them to remove identifying details, applies the release rules, and synthesises the report. All counts are computed in code from the items each theme cites.
 
+To see a run stage by stage in the browser:
+
+```
+npm run view -- evals/reports/<report>.json   # writes <report>.html next to it
+```
+
+The page shows each conversation, the items extracted and anonymised from it, the release decision, and the final report. Click a theme to highlight the items it was built from.
+
 ## Licence
 
 MIT. See [LICENSE](LICENSE).

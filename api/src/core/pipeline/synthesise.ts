@@ -58,7 +58,16 @@ function capConfidence(c: Confidence, voices: number, floor: number): Confidence
   return c;
 }
 
-export type SynthesisResult = { status: "held"; reason: string; totalGivers: number } | { status: "released"; report: Report };
+// Debug-only trace of which items each theme and answer rests on. Never shown to the receiver:
+// item ids reveal which points came from the same conversation.
+export interface Trace {
+  themes: { title: string; itemIds: string[] }[];
+  answers: { agendaItemId: string; itemIds: string[] }[];
+}
+
+export type SynthesisResult =
+  | { status: "held"; reason: string; totalGivers: number }
+  | { status: "released"; report: Report; trace: Trace };
 
 export async function synthesiseReport(
   llm: StructuredLLM,
@@ -88,7 +97,16 @@ export async function synthesiseReport(
     })),
   );
   const draft = await llm({ name: "report_draft", schema: Draft, instructions: instructions(agenda), input, effort: "high" });
-  return { status: "released", report: assemble(agenda, items, draft, decision.splitByRelationship, decision.totalGivers, floor) };
+  const known = new Set(items.map((i) => i.id));
+  const keep = (ids: string[]) => [...new Set(ids)].filter((id) => known.has(id));
+  return {
+    status: "released",
+    report: assemble(agenda, items, draft, decision.splitByRelationship, decision.totalGivers, floor),
+    trace: {
+      themes: draft.themes.map((t) => ({ title: t.title, itemIds: keep(t.itemIds) })),
+      answers: draft.answers.map((a) => ({ agendaItemId: a.agendaItemId, itemIds: keep(a.itemIds) })),
+    },
+  };
 }
 
 // Everything countable is computed here from cited item ids, never taken from the model.

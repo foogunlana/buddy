@@ -1,0 +1,268 @@
+<title>Buddy Pipeline Run</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; four pipeline stages stacked, each a band with a stage label; items table scrolls on its own. */
+:root {
+  --bg: #f6f7f6;
+  --surface: #ffffff;
+  --ink: #1b2422;
+  --muted: #5d6a67;
+  --line: #d9dfdd;
+  --accent: #1f6a63;
+  --accent-soft: #e1efec;
+  --keep: #2f6b3a;
+  --keep-soft: #e3f0e4;
+  --change: #8a5a12;
+  --change-soft: #f6ead6;
+  --held: #9b2f2f;
+  --held-soft: #f5e1e1;
+  --hl: #fff2b8;
+  --font-display: "Literata", Georgia, "Times New Roman", serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121716; --surface: #1a2120; --ink: #e4ebe9; --muted: #98a6a2; --line: #2c3634;
+    --accent: #6cc3b8; --accent-soft: #1d3532; --keep: #8fd29a; --keep-soft: #1d3322;
+    --change: #e6b465; --change-soft: #3a2c15; --held: #ef9a9a; --held-soft: #3d1f1f; --hl: #4a4220;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121716; --surface: #1a2120; --ink: #e4ebe9; --muted: #98a6a2; --line: #2c3634;
+  --accent: #6cc3b8; --accent-soft: #1d3532; --keep: #8fd29a; --keep-soft: #1d3322;
+  --change: #e6b465; --change-soft: #3a2c15; --held: #ef9a9a; --held-soft: #3d1f1f; --hl: #4a4220;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 650; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.05rem; }
+p { margin: 0; }
+.mono { font-family: var(--font-mono); font-size: 0.82rem; }
+.muted { color: var(--muted); }
+.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+
+header { display: flex; flex-direction: column; gap: 12px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: 0.9rem; }
+.meta b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.85rem; }
+.flow a { color: var(--accent); text-decoration: none; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+.flow a:hover, .flow a:focus-visible { border-color: var(--accent); outline: none; }
+.flow span { color: var(--muted); }
+
+section { display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 16px; }
+.stage-head { display: flex; flex-direction: column; gap: 4px; border-top: 2px solid var(--ink); padding-top: 12px; }
+.stage-head p { color: var(--muted); max-width: 68ch; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill.keep { background: var(--keep-soft); color: var(--keep); }
+.pill.change { background: var(--change-soft); color: var(--change); }
+.pill.ok { background: var(--accent-soft); color: var(--accent); }
+.pill.held { background: var(--held-soft); color: var(--held); }
+
+.givers { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.giver { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.giver-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.giver-top h3 { text-transform: capitalize; }
+details summary { cursor: pointer; color: var(--accent); font-size: 0.88rem; }
+details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.transcript { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 420px; overflow-y: auto; padding-right: 4px; }
+.turn { font-size: 0.86rem; padding: 8px 10px; border-radius: 6px; }
+.turn.interviewer { background: var(--accent-soft); }
+.turn.giver { background: var(--bg); border: 1px solid var(--line); }
+.turn .who { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; display: block; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 820px; font-size: 0.86rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; background: var(--bg); position: sticky; top: 0; }
+tr:last-child td { border-bottom: 0; }
+tr.hl td { background: var(--hl); transition: background 0.3s; }
+.fields { display: grid; grid-template-columns: max-content 1fr; gap: 3px 10px; }
+.fields dt { color: var(--muted); font-size: 0.74rem; padding-top: 2px; }
+.fields dd { margin: 0; }
+.fields dd.empty { color: var(--muted); font-style: italic; }
+.dots { display: inline-flex; gap: 3px; vertical-align: middle; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.dots i.on { background: var(--accent); }
+.giver-row td { background: var(--bg); font-weight: 600; text-transform: capitalize; }
+
+.rules { display: flex; flex-direction: column; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.rule { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); align-items: center; }
+.rule:last-child { border-bottom: 0; }
+.rule .val { font-variant-numeric: tabular-nums; text-align: right; }
+
+.report { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+.report-block { display: flex; flex-direction: column; gap: 10px; }
+.summary { font-size: 1rem; max-width: 70ch; }
+.theme { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; text-align: left; font: inherit; color: inherit; width: 100%; }
+.theme:hover, .theme:focus-visible { border-color: var(--accent); outline: none; }
+.theme.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.theme-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+.theme-title { font-weight: 600; }
+.count { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.85rem; }
+.theme ul { margin: 0; padding-left: 18px; }
+.trace { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 0.75rem; color: var(--muted); }
+.trace code { font-family: var(--font-mono); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+.list { display: flex; flex-direction: column; gap: 8px; }
+.gap-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.gap-list span { font-size: 0.82rem; border: 1px dashed var(--line); border-radius: 999px; padding: 2px 10px; color: var(--muted); }
+.note { font-size: 0.85rem; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+.held-box { background: var(--held-soft); color: var(--held); border-radius: 8px; padding: 16px; }
+@media (prefers-reduced-motion: reduce) { tr.hl td { transition: none; } html { scroll-behavior: auto; } }
+@media (max-width: 600px) { h1 { font-size: 1.6rem; } .report { padding: 16px; } }
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script id="data" type="application/json">/*__DATA__*/</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const app = document.getElementById("app");
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const rel = (r) => (r === "direct_report" ? "Direct report" : "Works with");
+  const FIELDS = ["behaviour", "example", "impact", "ask"];
+  const dots = (n) => `<span class="dots" title="Specificity ${n} of 3">${[1, 2, 3].map((i) => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span>`;
+  const fields = (item) => `<dl class="fields">${FIELDS.map((f) => `<dt>${f}</dt><dd class="${item[f] ? "" : "empty"}">${item[f] ? esc(item[f]) : "missing"}</dd>`).join("")}</dl>`;
+  const result = D.result;
+  const released = result.status === "released";
+  const totalItems = D.perGiver.reduce((n, g) => n + g.raw.length, 0);
+
+  // --- Header
+  let html = `<header>
+    <span class="label">Buddy · pipeline run</span>
+    <h1>From ${D.perGiver.length} conversation${D.perGiver.length === 1 ? "" : "s"} to a report on ${esc(D.receiver)}</h1>
+    <div class="meta">
+      <span>Run <b class="mono">${esc(D.runName)}</b></span>
+      <span>Givers <b>${D.perGiver.length}</b></span>
+      <span>Items <b>${totalItems}</b></span>
+      <span>Anonymity floor <b>${D.floor}</b>${D.floor < 3 ? ' <span class="pill held">lowered for testing</span>' : ""}</span>
+      <span>Tokens <b>${D.usage.inputTokens.toLocaleString()} in / ${D.usage.outputTokens.toLocaleString()} out</b></span>
+      <span>${released ? '<span class="pill ok">Report released</span>' : '<span class="pill held">Report held</span>'}</span>
+    </div>
+    <nav class="flow" aria-label="Pipeline stages">
+      <a href="#conversations">Conversations</a><span>→</span>
+      <a href="#items">Extract + anonymise</a><span>→</span>
+      <a href="#rules">Release rules</a><span>→</span>
+      <a href="#report">Report</a>
+    </nav>
+  </header>`;
+
+  // --- Stage 1: conversations
+  html += `<section id="conversations">
+    <div class="stage-head"><span class="label">Stage 1</span><h2>Conversations</h2>
+    <p>Each simulated giver talked to the interviewer. Open a card to read the transcript.</p></div>
+    <div class="givers">${D.perGiver.map((g) => {
+      const conv = D.conversations.find((c) => c.persona === g.persona) || { transcript: [] };
+      const giverTurns = conv.transcript.filter((t) => t.role === "giver").length;
+      return `<article class="giver">
+        <div class="giver-top"><h3>${esc(g.persona.replace(/_/g, " "))}</h3><span class="muted">${rel(g.relationship)}</span></div>
+        <div class="meta"><span>Turns <b>${giverTurns}</b></span><span>Ended <b>${esc(conv.stop || "?")}</b></span><span>Items <b>${g.raw.length}</b></span></div>
+        <details><summary>Read transcript</summary><div class="transcript">${conv.transcript.map((t) =>
+          `<div class="turn ${t.role}"><span class="who">${t.role}</span>${esc(t.text)}</div>`).join("")}</div></details>
+      </article>`;
+    }).join("")}</div>
+  </section>`;
+
+  // --- Stage 2: items, raw vs anonymised
+  html += `<section id="items">
+    <div class="stage-head"><span class="label">Stage 2</span><h2>Extract, then anonymise</h2>
+    <p>The extractor turns each conversation into feedback items. The anonymiser rewrites them to remove the giver's voice, names, dates and unique projects. Dots show specificity: behaviour, then example, then ask.</p></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th style="width:90px">Item</th><th style="width:110px">Type</th><th>As extracted</th><th>As anonymised (what synthesis sees)</th></tr></thead>
+      <tbody>${D.perGiver.map((g) => {
+        const rows = g.raw.map((raw) => {
+          const anon = g.anon.find((a) => a.id === raw.id) || raw;
+          return `<tr id="item-${esc(raw.id)}" data-item="${esc(raw.id)}">
+            <td class="mono">${esc(raw.id)}</td>
+            <td><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><span class="pill ${raw.polarity}">${raw.polarity}</span>${dots(raw.specificity)}</div></td>
+            <td><div class="muted" style="margin-bottom:4px">${esc(raw.theme)}</div>${fields(raw)}</td>
+            <td><div class="muted" style="margin-bottom:4px">${esc(anon.theme)}</div>${fields(anon)}</td>
+          </tr>`;
+        }).join("");
+        return `<tr class="giver-row"><td colspan="4">${esc(g.persona.replace(/_/g, " "))} · ${rel(g.relationship)}</td></tr>${rows || '<tr><td colspan="4" class="muted">No items extracted.</td></tr>'}`;
+      }).join("")}</tbody>
+    </table></div>
+  </section>`;
+
+  // --- Stage 3: release rules
+  const d = D.decision;
+  html += `<section id="rules">
+    <div class="stage-head"><span class="label">Stage 3</span><h2>Release rules</h2>
+    <p>Plain code, no model. It decides whether the report can be shown and what it may reveal.</p></div>
+    <div class="rules">
+      <div class="rule"><span>Givers with at least one approved item</span><span class="val">${d.totalGivers}</span></div>
+      <div class="rule"><span>Direct reports / others</span><span class="val">${d.direct} / ${d.nonDirect}</span></div>
+      <div class="rule"><span>Release needs at least ${D.floor} givers</span><span class="val">${released ? '<span class="pill ok">met</span>' : '<span class="pill held">not met</span>'}</span></div>
+      <div class="rule"><span>Show direct / other split (both groups need ${D.floor}+)</span><span class="val">${d.split ? '<span class="pill ok">shown</span>' : '<span class="pill held">hidden</span>'}</span></div>
+      <div class="rule"><span>Examples only for themes raised by 2+ givers</span><span class="val"><span class="pill ok">applied</span></span></div>
+      <div class="rule"><span>Every count computed from cited items; uncited themes dropped</span><span class="val"><span class="pill ok">applied</span></span></div>
+    </div>
+  </section>`;
+
+  // --- Stage 4: report
+  html += `<section id="report">
+    <div class="stage-head"><span class="label">Stage 4</span><h2>The report ${esc(D.receiver)} reads</h2>
+    <p>Click a theme to highlight the items it was built from. Item ids are shown here for debugging only; the receiver never sees them.</p></div>`;
+  if (!released) {
+    html += `<div class="held-box"><b>Held.</b> ${esc(result.reason)}</div>`;
+  } else {
+    const r = result.report;
+    const traceFor = (title) => (result.trace.themes.find((t) => t.title === title) || { itemIds: [] }).itemIds;
+    const theme = (t, pol) => {
+      const ids = traceFor(t.title);
+      const split = t.directReports === null ? "" : ` · ${t.directReports} direct, ${t.nonDirect} other`;
+      return `<button class="theme" type="button" data-ids="${esc(ids.join(","))}">
+        <div class="theme-top"><span class="theme-title">${esc(t.title)}</span>
+          <span class="count">${t.givers} of ${r.totalGivers}${split}${t.givers === 1 ? " · one voice" : ""}</span></div>
+        <p>${esc(t.whyItMattered)}</p>
+        ${t.examples.length ? `<ul>${t.examples.map((e) => `<li>e.g. ${esc(e)}</li>`).join("")}</ul>` : ""}
+        ${t.asks.length ? `<ul>${t.asks.map((a) => `<li><b>Ask:</b> ${esc(a)}</li>`).join("")}</ul>` : ""}
+        <div class="trace">Built from ${ids.map((id) => `<code>${esc(id)}</code>`).join(" ") || "no items"}</div>
+      </button>`;
+    };
+    html += `<div class="report">
+      ${r.questionsAnswered.length ? `<div class="report-block"><span class="label">Your questions</span><div class="list">${r.questionsAnswered.map((q) =>
+        `<div><b>${esc(q.question)}</b><p>${esc(q.answer)} <span class="count">${q.voices} voices · ${q.confidence}</span></p></div>`).join("")}</div></div>` : ""}
+      <div class="report-block"><span class="label">Summary</span><p class="summary">${esc(r.summary)}</p></div>
+      <div class="report-block"><span class="label">Keep doing</span><div class="list">${r.keepDoing.map((t) => theme(t, "keep")).join("") || '<p class="muted">None.</p>'}</div></div>
+      <div class="report-block"><span class="label">Change</span><div class="list">${r.change.map((t) => theme(t, "change")).join("") || '<p class="muted">None.</p>'}</div></div>
+      ${r.sinceLastTime.length ? `<div class="report-block"><span class="label">Since last time</span><div class="list">${r.sinceLastTime.map((s) =>
+        `<div><b>${esc(s.action)}</b><p>${esc(s.progress)} <span class="count">${s.voices} voices</span></p></div>`).join("")}</div></div>` : ""}
+      <div class="report-block"><span class="label">What we couldn't find out (fewer than ${D.floor} voices)</span>
+        <div class="gap-list">${r.gaps.map((g) => `<span>${esc(g.title)} · ${g.voices}</span>`).join("") || '<p class="muted">Nothing.</p>'}</div></div>
+      <p class="note">Ratings by dimension are not collected yet.</p>
+    </div>`;
+  }
+  html += `</section>`;
+  app.innerHTML = html;
+
+  // --- Theme → item highlighting
+  app.addEventListener("click", (e) => {
+    const btn = e.target.closest(".theme");
+    if (!btn) return;
+    const wasActive = btn.classList.contains("active");
+    app.querySelectorAll(".theme.active").forEach((b) => b.classList.remove("active"));
+    app.querySelectorAll("tr.hl").forEach((r) => r.classList.remove("hl"));
+    if (wasActive) return;
+    btn.classList.add("active");
+    const ids = btn.dataset.ids ? btn.dataset.ids.split(",") : [];
+    ids.forEach((id) => { const row = document.getElementById("item-" + id); if (row) row.classList.add("hl"); });
+    const first = ids.length && document.getElementById("item-" + ids[0]);
+    if (first) first.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+  });
+})();
+</script>

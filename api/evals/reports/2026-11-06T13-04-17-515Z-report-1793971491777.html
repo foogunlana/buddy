@@ -1,0 +1,268 @@
+<title>Buddy Pipeline Run</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; four pipeline stages stacked, each a band with a stage label; items table scrolls on its own. */
+:root {
+  --bg: #f6f7f6;
+  --surface: #ffffff;
+  --ink: #1b2422;
+  --muted: #5d6a67;
+  --line: #d9dfdd;
+  --accent: #1f6a63;
+  --accent-soft: #e1efec;
+  --keep: #2f6b3a;
+  --keep-soft: #e3f0e4;
+  --change: #8a5a12;
+  --change-soft: #f6ead6;
+  --held: #9b2f2f;
+  --held-soft: #f5e1e1;
+  --hl: #fff2b8;
+  --font-display: "Literata", Georgia, "Times New Roman", serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121716; --surface: #1a2120; --ink: #e4ebe9; --muted: #98a6a2; --line: #2c3634;
+    --accent: #6cc3b8; --accent-soft: #1d3532; --keep: #8fd29a; --keep-soft: #1d3322;
+    --change: #e6b465; --change-soft: #3a2c15; --held: #ef9a9a; --held-soft: #3d1f1f; --hl: #4a4220;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121716; --surface: #1a2120; --ink: #e4ebe9; --muted: #98a6a2; --line: #2c3634;
+  --accent: #6cc3b8; --accent-soft: #1d3532; --keep: #8fd29a; --keep-soft: #1d3322;
+  --change: #e6b465; --change-soft: #3a2c15; --held: #ef9a9a; --held-soft: #3d1f1f; --hl: #4a4220;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 650; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.05rem; }
+p { margin: 0; }
+.mono { font-family: var(--font-mono); font-size: 0.82rem; }
+.muted { color: var(--muted); }
+.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+
+header { display: flex; flex-direction: column; gap: 12px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: 0.9rem; }
+.meta b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.85rem; }
+.flow a { color: var(--accent); text-decoration: none; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+.flow a:hover, .flow a:focus-visible { border-color: var(--accent); outline: none; }
+.flow span { color: var(--muted); }
+
+section { display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 16px; }
+.stage-head { display: flex; flex-direction: column; gap: 4px; border-top: 2px solid var(--ink); padding-top: 12px; }
+.stage-head p { color: var(--muted); max-width: 68ch; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill.keep { background: var(--keep-soft); color: var(--keep); }
+.pill.change { background: var(--change-soft); color: var(--change); }
+.pill.ok { background: var(--accent-soft); color: var(--accent); }
+.pill.held { background: var(--held-soft); color: var(--held); }
+
+.givers { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.giver { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.giver-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.giver-top h3 { text-transform: capitalize; }
+details summary { cursor: pointer; color: var(--accent); font-size: 0.88rem; }
+details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.transcript { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 420px; overflow-y: auto; padding-right: 4px; }
+.turn { font-size: 0.86rem; padding: 8px 10px; border-radius: 6px; }
+.turn.interviewer { background: var(--accent-soft); }
+.turn.giver { background: var(--bg); border: 1px solid var(--line); }
+.turn .who { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; display: block; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 820px; font-size: 0.86rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; background: var(--bg); position: sticky; top: 0; }
+tr:last-child td { border-bottom: 0; }
+tr.hl td { background: var(--hl); transition: background 0.3s; }
+.fields { display: grid; grid-template-columns: max-content 1fr; gap: 3px 10px; }
+.fields dt { color: var(--muted); font-size: 0.74rem; padding-top: 2px; }
+.fields dd { margin: 0; }
+.fields dd.empty { color: var(--muted); font-style: italic; }
+.dots { display: inline-flex; gap: 3px; vertical-align: middle; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.dots i.on { background: var(--accent); }
+.giver-row td { background: var(--bg); font-weight: 600; text-transform: capitalize; }
+
+.rules { display: flex; flex-direction: column; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.rule { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); align-items: center; }
+.rule:last-child { border-bottom: 0; }
+.rule .val { font-variant-numeric: tabular-nums; text-align: right; }
+
+.report { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+.report-block { display: flex; flex-direction: column; gap: 10px; }
+.summary { font-size: 1rem; max-width: 70ch; }
+.theme { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; text-align: left; font: inherit; color: inherit; width: 100%; }
+.theme:hover, .theme:focus-visible { border-color: var(--accent); outline: none; }
+.theme.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.theme-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+.theme-title { font-weight: 600; }
+.count { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.85rem; }
+.theme ul { margin: 0; padding-left: 18px; }
+.trace { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 0.75rem; color: var(--muted); }
+.trace code { font-family: var(--font-mono); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+.list { display: flex; flex-direction: column; gap: 8px; }
+.gap-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.gap-list span { font-size: 0.82rem; border: 1px dashed var(--line); border-radius: 999px; padding: 2px 10px; color: var(--muted); }
+.note { font-size: 0.85rem; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+.held-box { background: var(--held-soft); color: var(--held); border-radius: 8px; padding: 16px; }
+@media (prefers-reduced-motion: reduce) { tr.hl td { transition: none; } html { scroll-behavior: auto; } }
+@media (max-width: 600px) { h1 { font-size: 1.6rem; } .report { padding: 16px; } }
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script id="data" type="application/json">{"receiver":"Alex","runName":"2026-11-06T13-04-17-515Z","floor":1,"usage":{"inputTokens":2466,"outputTokens":2036},"perGiver":[{"persona":"vague","raw":[{"polarity":"keep","agendaItemId":"listening_respect","theme":"1:1 follow-through","behaviour":"In 1:1s, Alex makes people feel heard, remembers previous discussions, and follows up.","example":null,"impact":"Builds a lot of trust.","ask":"Keep doing this in 1:1s.","recurrence":"pattern","id":"c1-1","specificity":1,"approved":false},{"polarity":"change","agendaItemId":"execution_delivery","theme":"Timeline communication","behaviour":"Alex sets delivery expectations without enough detail and communicates changes late or not internally.","example":"A delivery expectation was set without enough detail, then changed late and was not communicated internally.","impact":"Makes planning harder.","ask":"Give clearer dates or confidence ranges and update them regularly.","recurrence":"pattern","id":"c1-2","specificity":3,"approved":false},{"polarity":"keep","agendaItemId":"feedback_coaching","theme":"Hands-on unblocking","behaviour":"Alex is supportive and available when someone is stuck, and is willing to jump in directly to help unblock people.","example":"He made time to work directly with someone who was blocked, which helped resolve the issue faster.","impact":"Saved a lot of time and is valuable to the team.","ask":"Keep making time to help when someone is genuinely blocked.","recurrence":"pattern","id":"c1-3","specificity":3,"approved":false},{"polarity":"keep","agendaItemId":"standards_excellence","theme":"Supportive quality bar","behaviour":"Alex encourages the team to do solid work and is supportive if issues come up.","example":null,"impact":null,"ask":"Keep encouraging solid work and supporting the team when issues arise.","recurrence":"pattern","id":"c1-4","specificity":1,"approved":false}],"anon":[{"polarity":"keep","agendaItemId":"listening_respect","theme":"Follow-through in 1:1 conversations","behaviour":"In 1:1 conversations, Alex helps people feel heard, recalls earlier discussions, and follows up on agreed points.","example":null,"impact":"This builds trust.","ask":"Continue following up consistently in 1:1 conversations.","recurrence":"pattern","id":"c1-1","specificity":1,"approved":true},{"polarity":"change","agendaItemId":"execution_delivery","theme":"Communication about timelines","behaviour":"Alex sometimes sets delivery expectations without enough detail and communicates changes late or not at all to the relevant internal group.","example":"A delivery expectation was set without enough detail, then later changed and was not communicated internally in time.","impact":"This makes planning harder.","ask":"Provide clearer dates or confidence ranges, and update them regularly when timelines change.","recurrence":"pattern","id":"c1-2","specificity":3,"approved":true},{"polarity":"keep","agendaItemId":"feedback_coaching","theme":"Helping unblock work","behaviour":"Alex is supportive and available when someone is stuck, and is willing to get involved directly to help remove blockers.","example":"Alex made time to work directly with someone who was blocked, which helped resolve the issue more quickly.","impact":"This saves time and provides value to the team.","ask":"Continue making time to help when someone is genuinely blocked.","recurrence":"pattern","id":"c1-3","specificity":3,"approved":true},{"polarity":"keep","agendaItemId":"standards_excellence","theme":"Supportive quality expectations","behaviour":"Alex encourages the team to produce solid work and provides support when issues come up.","example":null,"impact":null,"ask":"Continue encouraging solid work and supporting the team when issues arise.","recurrence":"pattern","id":"c1-4","specificity":1,"approved":true}],"relationship":"direct_report"}],"result":{"status":"released","report":{"receiverName":"Alex","totalGivers":1,"questionsAnswered":[],"summary":"Alex’s strongest keep theme is consistent support: in 1:1s, Alex helps people feel heard, follows up, and makes time to unblock work. Feedback also points to helpful quality expectations, with support provided when issues arise. The main change theme is timeline communication: delivery expectations sometimes need clearer detail, earlier updates, and shared confidence ranges so others can plan reliably.","keepDoing":[{"title":"Follow through in 1:1 conversations","givers":1,"directReports":null,"nonDirect":null,"examples":[],"whyItMattered":"Consistent follow-through in 1:1 conversations builds trust and makes discussions feel actionable.","asks":["Continue following up consistently on agreed points from 1:1 conversations."]},{"title":"Support the team to unblock work and meet standards","givers":1,"directReports":null,"nonDirect":null,"examples":[],"whyItMattered":"Timely support helps work move faster while maintaining solid quality expectations.","asks":["Continue making time to help when someone is genuinely blocked.","Continue encouraging solid work and supporting the team when issues arise."]}],"change":[{"title":"Give clearer and earlier timeline updates","givers":1,"directReports":null,"nonDirect":null,"examples":[],"whyItMattered":"Clear and timely timeline communication helps internal planning and coordination.","asks":["When setting delivery expectations, provide clearer dates or confidence ranges.","When timelines change, update the relevant internal group promptly and regularly."]}],"byDimension":[{"agendaItemId":"trust_morale","title":"Trust & Morale","averageRating":null,"ratings":0},{"agendaItemId":"listening_respect","title":"Listening & Respect","averageRating":null,"ratings":0},{"agendaItemId":"execution_delivery","title":"Execution & Delivery","averageRating":null,"ratings":0},{"agendaItemId":"commercial_strategy","title":"Commercial & Strategy Alignment","averageRating":null,"ratings":0},{"agendaItemId":"standards_excellence","title":"Standards & Excellence","averageRating":null,"ratings":0},{"agendaItemId":"feedback_coaching","title":"Feedback & Coaching","averageRating":null,"ratings":0}],"sinceLastTime":[],"gaps":[{"agendaItemId":"trust_morale","title":"Trust & Morale","voices":0},{"agendaItemId":"commercial_strategy","title":"Commercial & Strategy Alignment","voices":0}]},"trace":{"themes":[{"title":"Follow through in 1:1 conversations","itemIds":["c1-1"]},{"title":"Support the team to unblock work and meet standards","itemIds":["c1-3","c1-4"]},{"title":"Give clearer and earlier timeline updates","itemIds":["c1-2"]}],"answers":[]}},"decision":{"totalGivers":1,"direct":1,"nonDirect":0,"split":false},"conversations":[{"persona":"vague","stop":"turn_limit","transcript":[{"role":"interviewer","text":"Hi. This is a short, confidential conversation about working with Alex. Alex will only see themes pooled from several people, in paraphrased form, and you'll review exactly what gets shared before it's pooled.\n\nTo start: what does Alex do well that you'd want them to keep doing?","at":"2026-11-06T13:04:17.516Z"},{"role":"giver","text":"Alex is really good in 1:1s and makes people feel heard. He remembers what we discussed previously and follows up, which builds a lot of trust.","at":"2026-11-06T13:04:22.935Z"},{"role":"interviewer","text":"Thanks. What is one thing Alex could do differently that would make working with them better?","at":"2026-11-06T13:04:27.940Z"},{"role":"giver","text":"Communication around timelines could be better. I’d find it helpful if he gave clearer dates or confidence ranges, and updated them regularly.","at":"2026-11-06T13:04:31.560Z"},{"role":"interviewer","text":"When was the last time that timeline communication created a problem, and what was going on?","at":"2026-11-06T13:04:35.971Z"},{"role":"giver","text":"About three weeks ago in sprint planning, Alex committed to the search feature being done by end of month without much breakdown. It ended up slipping by about two weeks, and I only found out through a client, which was pretty embarrassing.","at":"2026-11-06T13:04:38.009Z"},{"role":"interviewer","text":"Some details there, like the timing, sprint planning, the feature, and client route, could identify the situation; would you like those kept, made more general, or dropped from the notes?","at":"2026-11-06T13:04:44.710Z"},{"role":"giver","text":"I’d prefer that be made more general. The main point is that a delivery expectation was set without enough detail, then changed late and wasn’t communicated internally.","at":"2026-11-06T13:04:46.966Z"},{"role":"interviewer","text":"How typical is that timeline pattern: more of a one-off, or something that happens repeatedly?","at":"2026-11-06T13:04:53.637Z"},{"role":"giver","text":"It’s a recurring pattern to some extent. When asked about dates, Alex often says things like “soon” or “should be fine,” which makes planning harder.","at":"2026-11-06T13:04:55.929Z"},{"role":"interviewer","text":"What else, if anything, would be useful for Alex to change or keep doing?","at":"2026-11-06T13:05:03.370Z"},{"role":"giver","text":"He should keep being supportive and available when someone is stuck. For example, he helped unblock me on a database migration by pairing with me for about an hour, and it saved a lot of time.","at":"2026-11-06T13:05:06.535Z"},{"role":"interviewer","text":"The database migration example could identify the situation; would you like that kept, made more general, or dropped from the notes?","at":"2026-11-06T13:05:14.850Z"},{"role":"giver","text":"Made more general would be best. The theme is that he’s willing to jump in directly and help unblock people, which is really valuable.","at":"2026-11-06T13:05:16.806Z"},{"role":"interviewer","text":"How often does Alex jump in directly to help unblock people like that?","at":"2026-11-06T13:05:28.446Z"},{"role":"giver","text":"I’d say it happens when needed, not constantly. He’s approachable, and if something is genuinely blocked, he’ll usually make time to help.","at":"2026-11-06T13:05:30.481Z"},{"role":"interviewer","text":"How does Alex connect your work to the broader company priorities or strategy?","at":"2026-11-06T13:05:41.070Z"},{"role":"giver","text":"I don’t really have enough context on the commercial strategy or how our work ties to company priorities. From my perspective, that connection isn’t very clear.","at":"2026-11-06T13:05:43.073Z"},{"role":"interviewer","text":"How does Alex set the quality bar for the team and help people meet it?","at":"2026-11-06T13:05:54.891Z"},{"role":"giver","text":"Generally, he encourages us to do solid work and is supportive if issues come up. I don’t have a very specific example beyond the unblocking help I mentioned.","at":"2026-11-06T13:05:57.180Z"},{"role":"interviewer","text":"Thanks, that's all the time we have. Next you'll see a summary of what will be shared, and you can edit or remove anything.","at":"2026-11-06T13:06:09.270Z"}]}]}</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const app = document.getElementById("app");
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const rel = (r) => (r === "direct_report" ? "Direct report" : "Works with");
+  const FIELDS = ["behaviour", "example", "impact", "ask"];
+  const dots = (n) => `<span class="dots" title="Specificity ${n} of 3">${[1, 2, 3].map((i) => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span>`;
+  const fields = (item) => `<dl class="fields">${FIELDS.map((f) => `<dt>${f}</dt><dd class="${item[f] ? "" : "empty"}">${item[f] ? esc(item[f]) : "missing"}</dd>`).join("")}</dl>`;
+  const result = D.result;
+  const released = result.status === "released";
+  const totalItems = D.perGiver.reduce((n, g) => n + g.raw.length, 0);
+
+  // --- Header
+  let html = `<header>
+    <span class="label">Buddy · pipeline run</span>
+    <h1>From ${D.perGiver.length} conversation${D.perGiver.length === 1 ? "" : "s"} to a report on ${esc(D.receiver)}</h1>
+    <div class="meta">
+      <span>Run <b class="mono">${esc(D.runName)}</b></span>
+      <span>Givers <b>${D.perGiver.length}</b></span>
+      <span>Items <b>${totalItems}</b></span>
+      <span>Anonymity floor <b>${D.floor}</b>${D.floor < 3 ? ' <span class="pill held">lowered for testing</span>' : ""}</span>
+      <span>Tokens <b>${D.usage.inputTokens.toLocaleString()} in / ${D.usage.outputTokens.toLocaleString()} out</b></span>
+      <span>${released ? '<span class="pill ok">Report released</span>' : '<span class="pill held">Report held</span>'}</span>
+    </div>
+    <nav class="flow" aria-label="Pipeline stages">
+      <a href="#conversations">Conversations</a><span>→</span>
+      <a href="#items">Extract + anonymise</a><span>→</span>
+      <a href="#rules">Release rules</a><span>→</span>
+      <a href="#report">Report</a>
+    </nav>
+  </header>`;
+
+  // --- Stage 1: conversations
+  html += `<section id="conversations">
+    <div class="stage-head"><span class="label">Stage 1</span><h2>Conversations</h2>
+    <p>Each simulated giver talked to the interviewer. Open a card to read the transcript.</p></div>
+    <div class="givers">${D.perGiver.map((g) => {
+      const conv = D.conversations.find((c) => c.persona === g.persona) || { transcript: [] };
+      const giverTurns = conv.transcript.filter((t) => t.role === "giver").length;
+      return `<article class="giver">
+        <div class="giver-top"><h3>${esc(g.persona.replace(/_/g, " "))}</h3><span class="muted">${rel(g.relationship)}</span></div>
+        <div class="meta"><span>Turns <b>${giverTurns}</b></span><span>Ended <b>${esc(conv.stop || "?")}</b></span><span>Items <b>${g.raw.length}</b></span></div>
+        <details><summary>Read transcript</summary><div class="transcript">${conv.transcript.map((t) =>
+          `<div class="turn ${t.role}"><span class="who">${t.role}</span>${esc(t.text)}</div>`).join("")}</div></details>
+      </article>`;
+    }).join("")}</div>
+  </section>`;
+
+  // --- Stage 2: items, raw vs anonymised
+  html += `<section id="items">
+    <div class="stage-head"><span class="label">Stage 2</span><h2>Extract, then anonymise</h2>
+    <p>The extractor turns each conversation into feedback items. The anonymiser rewrites them to remove the giver's voice, names, dates and unique projects. Dots show specificity: behaviour, then example, then ask.</p></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th style="width:90px">Item</th><th style="width:110px">Type</th><th>As extracted</th><th>As anonymised (what synthesis sees)</th></tr></thead>
+      <tbody>${D.perGiver.map((g) => {
+        const rows = g.raw.map((raw) => {
+          const anon = g.anon.find((a) => a.id === raw.id) || raw;
+          return `<tr id="item-${esc(raw.id)}" data-item="${esc(raw.id)}">
+            <td class="mono">${esc(raw.id)}</td>
+            <td><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><span class="pill ${raw.polarity}">${raw.polarity}</span>${dots(raw.specificity)}</div></td>
+            <td><div class="muted" style="margin-bottom:4px">${esc(raw.theme)}</div>${fields(raw)}</td>
+            <td><div class="muted" style="margin-bottom:4px">${esc(anon.theme)}</div>${fields(anon)}</td>
+          </tr>`;
+        }).join("");
+        return `<tr class="giver-row"><td colspan="4">${esc(g.persona.replace(/_/g, " "))} · ${rel(g.relationship)}</td></tr>${rows || '<tr><td colspan="4" class="muted">No items extracted.</td></tr>'}`;
+      }).join("")}</tbody>
+    </table></div>
+  </section>`;
+
+  // --- Stage 3: release rules
+  const d = D.decision;
+  html += `<section id="rules">
+    <div class="stage-head"><span class="label">Stage 3</span><h2>Release rules</h2>
+    <p>Plain code, no model. It decides whether the report can be shown and what it may reveal.</p></div>
+    <div class="rules">
+      <div class="rule"><span>Givers with at least one approved item</span><span class="val">${d.totalGivers}</span></div>
+      <div class="rule"><span>Direct reports / others</span><span class="val">${d.direct} / ${d.nonDirect}</span></div>
+      <div class="rule"><span>Release needs at least ${D.floor} givers</span><span class="val">${released ? '<span class="pill ok">met</span>' : '<span class="pill held">not met</span>'}</span></div>
+      <div class="rule"><span>Show direct / other split (both groups need ${D.floor}+)</span><span class="val">${d.split ? '<span class="pill ok">shown</span>' : '<span class="pill held">hidden</span>'}</span></div>
+      <div class="rule"><span>Examples only for themes raised by 2+ givers</span><span class="val"><span class="pill ok">applied</span></span></div>
+      <div class="rule"><span>Every count computed from cited items; uncited themes dropped</span><span class="val"><span class="pill ok">applied</span></span></div>
+    </div>
+  </section>`;
+
+  // --- Stage 4: report
+  html += `<section id="report">
+    <div class="stage-head"><span class="label">Stage 4</span><h2>The report ${esc(D.receiver)} reads</h2>
+    <p>Click a theme to highlight the items it was built from. Item ids are shown here for debugging only; the receiver never sees them.</p></div>`;
+  if (!released) {
+    html += `<div class="held-box"><b>Held.</b> ${esc(result.reason)}</div>`;
+  } else {
+    const r = result.report;
+    const traceFor = (title) => (result.trace.themes.find((t) => t.title === title) || { itemIds: [] }).itemIds;
+    const theme = (t, pol) => {
+      const ids = traceFor(t.title);
+      const split = t.directReports === null ? "" : ` · ${t.directReports} direct, ${t.nonDirect} other`;
+      return `<button class="theme" type="button" data-ids="${esc(ids.join(","))}">
+        <div class="theme-top"><span class="theme-title">${esc(t.title)}</span>
+          <span class="count">${t.givers} of ${r.totalGivers}${split}${t.givers === 1 ? " · one voice" : ""}</span></div>
+        <p>${esc(t.whyItMattered)}</p>
+        ${t.examples.length ? `<ul>${t.examples.map((e) => `<li>e.g. ${esc(e)}</li>`).join("")}</ul>` : ""}
+        ${t.asks.length ? `<ul>${t.asks.map((a) => `<li><b>Ask:</b> ${esc(a)}</li>`).join("")}</ul>` : ""}
+        <div class="trace">Built from ${ids.map((id) => `<code>${esc(id)}</code>`).join(" ") || "no items"}</div>
+      </button>`;
+    };
+    html += `<div class="report">
+      ${r.questionsAnswered.length ? `<div class="report-block"><span class="label">Your questions</span><div class="list">${r.questionsAnswered.map((q) =>
+        `<div><b>${esc(q.question)}</b><p>${esc(q.answer)} <span class="count">${q.voices} voices · ${q.confidence}</span></p></div>`).join("")}</div></div>` : ""}
+      <div class="report-block"><span class="label">Summary</span><p class="summary">${esc(r.summary)}</p></div>
+      <div class="report-block"><span class="label">Keep doing</span><div class="list">${r.keepDoing.map((t) => theme(t, "keep")).join("") || '<p class="muted">None.</p>'}</div></div>
+      <div class="report-block"><span class="label">Change</span><div class="list">${r.change.map((t) => theme(t, "change")).join("") || '<p class="muted">None.</p>'}</div></div>
+      ${r.sinceLastTime.length ? `<div class="report-block"><span class="label">Since last time</span><div class="list">${r.sinceLastTime.map((s) =>
+        `<div><b>${esc(s.action)}</b><p>${esc(s.progress)} <span class="count">${s.voices} voices</span></p></div>`).join("")}</div></div>` : ""}
+      <div class="report-block"><span class="label">What we couldn't find out (fewer than ${D.floor} voices)</span>
+        <div class="gap-list">${r.gaps.map((g) => `<span>${esc(g.title)} · ${g.voices}</span>`).join("") || '<p class="muted">Nothing.</p>'}</div></div>
+      <p class="note">Ratings by dimension are not collected yet.</p>
+    </div>`;
+  }
+  html += `</section>`;
+  app.innerHTML = html;
+
+  // --- Theme → item highlighting
+  app.addEventListener("click", (e) => {
+    const btn = e.target.closest(".theme");
+    if (!btn) return;
+    const wasActive = btn.classList.contains("active");
+    app.querySelectorAll(".theme.active").forEach((b) => b.classList.remove("active"));
+    app.querySelectorAll("tr.hl").forEach((r) => r.classList.remove("hl"));
+    if (wasActive) return;
+    btn.classList.add("active");
+    const ids = btn.dataset.ids ? btn.dataset.ids.split(",") : [];
+    ids.forEach((id) => { const row = document.getElementById("item-" + id); if (row) row.classList.add("hl"); });
+    const first = ids.length && document.getElementById("item-" + ids[0]);
+    if (first) first.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+  });
+})();
+</script>

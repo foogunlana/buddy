@@ -7,7 +7,8 @@
     "typecheck": "tsc --noEmit",
     "chat": "tsx src/cli/chat.ts",
     "eval": "tsx evals/run.ts",
-    "report": "tsx evals/report.ts"
+    "report": "tsx evals/report.ts",
+    "view": "tsx evals/view.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
